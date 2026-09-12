@@ -1,106 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mochi Room</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Pet</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <main class="game">
+  <main class="game-shell">
 
-    <header class="hud">
+    <header class="topbar">
       <div>
-        <span class="tiny">MOCHI ROOM</span>
+        <span class="mini-label">PIXEL PET</span>
         <h1 id="petName">Mochi</h1>
       </div>
 
-      <div class="hud-right">
-        <div>⭐ Lv <span id="level">1</span></div>
+      <div class="hud">
+        <div>LV <span id="level">1</span></div>
+        <div>XP <span id="xp">0</span>/100</div>
         <div>🪙 <span id="coins">100</span></div>
       </div>
     </header>
 
-    <section class="room" id="room">
+    <section class="screen">
 
-      <div class="window">
-        <div class="sky">☁️</div>
+      <div class="room">
+
+        <div class="window-pixel">
+          <div class="sky"></div>
+          <div class="cloud cloud-1"></div>
+          <div class="cloud cloud-2"></div>
+        </div>
+
+        <div class="poster">
+          <span>★</span>
+        </div>
+
+        <div class="shelf">
+          <div class="book book-a"></div>
+          <div class="book book-b"></div>
+          <div class="plant">♣</div>
+        </div>
+
+        <div class="speech hidden" id="speech">
+          meow!
+        </div>
+
+        <div class="pet-zone" id="petZone">
+          <div class="pixel-cat" id="pixelCat">
+            <div class="tail"></div>
+
+            <div class="ear ear-left"></div>
+            <div class="ear ear-right"></div>
+
+            <div class="head">
+              <div class="eye eye-left"></div>
+              <div class="eye eye-right"></div>
+              <div class="nose"></div>
+            </div>
+
+            <div class="body"></div>
+
+            <div class="paw paw-left"></div>
+            <div class="paw paw-right"></div>
+          </div>
+
+          <div class="floating-effect" id="floatingEffect"></div>
+        </div>
+
+        <div class="bed object" id="bed">
+          <div class="bed-pillow"></div>
+          <div class="bed-base"></div>
+          <span>BED</span>
+        </div>
+
+        <div class="food-bowl object" id="foodBowl">
+          <div class="bowl-food"></div>
+          <div class="bowl"></div>
+          <span>FOOD</span>
+        </div>
+
+        <div class="ball object" id="ball">
+          <div class="ball-body"></div>
+          <span>PLAY</span>
+        </div>
+
+        <div class="bath object" id="bath">
+          <div class="bath-top"></div>
+          <div class="bath-body"></div>
+          <span>BATH</span>
+        </div>
+
+        <div class="floor-line"></div>
+
       </div>
 
-      <div class="wall-decoration">♡</div>
+      <div class="stats">
 
-      <div class="speech hidden" id="speech">
-        meow!
+        <div class="stat">
+          <span>HUNGER</span>
+          <div class="meter">
+            <div id="hungerBar"></div>
+          </div>
+          <b id="hungerText">80</b>
+        </div>
+
+        <div class="stat">
+          <span>HAPPY</span>
+          <div class="meter">
+            <div id="happyBar"></div>
+          </div>
+          <b id="happyText">80</b>
+        </div>
+
+        <div class="stat">
+          <span>ENERGY</span>
+          <div class="meter">
+            <div id="energyBar"></div>
+          </div>
+          <b id="energyText">80</b>
+        </div>
+
+        <div class="stat">
+          <span>CLEAN</span>
+          <div class="meter">
+            <div id="cleanBar"></div>
+          </div>
+          <b id="cleanText">80</b>
+        </div>
+
       </div>
-
-      <div class="pet-wrapper" id="petWrapper">
-        <div class="effect" id="effect"></div>
-        <div class="pet" id="pet">🐱</div>
-      </div>
-
-      <div class="bed" id="bed">
-        <span>🛏️</span>
-        <small>sleep</small>
-      </div>
-
-      <div class="bath" id="bath">
-        <span>🛁</span>
-        <small>bath</small>
-      </div>
-
-      <div class="floor-shadow"></div>
 
     </section>
 
-    <section class="stats">
-      <div class="stat">
-        <span>🍗</span>
-        <div class="bar"><div id="hungerBar"></div></div>
-      </div>
-
-      <div class="stat">
-        <span>💗</span>
-        <div class="bar"><div id="happyBar"></div></div>
-      </div>
-
-      <div class="stat">
-        <span>⚡</span>
-        <div class="bar"><div id="energyBar"></div></div>
-      </div>
-
-      <div class="stat">
-        <span>🫧</span>
-        <div class="bar"><div id="cleanBar"></div></div>
-      </div>
-    </section>
-
-    <section class="inventory">
-
-      <div class="item" draggable="true" data-item="food">
-        <span>🍗</span>
-        <small>Food</small>
-      </div>
-
-      <div class="item" draggable="true" data-item="ball">
-        <span>🎾</span>
-        <small>Ball</small>
-      </div>
-
-      <div class="item" draggable="true" data-item="fish">
-        <span>🐟</span>
-        <small>Fish</small>
-      </div>
-
-      <button class="rename" onclick="renamePet()">
-        ✏️ Rename
-      </button>
-
-    </section>
+    <div class="controls">
+      <button onclick="renamePet()">RENAME</button>
+      <button onclick="resetPet()">RESET</button>
+    </div>
 
     <p class="hint">
-      drag food or toys to your pet • click the pet to pet them
+      click the cat • click food, ball, bed, or bath
     </p>
 
   </main>
