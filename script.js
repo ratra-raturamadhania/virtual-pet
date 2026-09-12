@@ -61,8 +61,8 @@ let busy = false;
 
 let catDragging = false;
 let dragMoved = false;
-
 let catDragPointerId = null;
+
 let catOffsetX = 0;
 let catOffsetY = 0;
 
@@ -75,10 +75,9 @@ let ballLastX = 0;
 let ballLastY = 0;
 let ballVX = 0;
 let ballVY = 0;
-
 let ballAnimationId = null;
-let gravityAnimationId = null;
 
+let gravityAnimationId = null;
 let idleTimer = null;
 
 /* =========================
@@ -93,7 +92,7 @@ function save() {
 }
 
 /* =========================
-   BASIC HELPERS
+   HELPERS
 ========================= */
 
 function clamp(value, min = 0, max = 100) {
@@ -104,24 +103,26 @@ function roomRect() {
   return room.getBoundingClientRect();
 }
 
-function floorY() {
-  const rect = roomRect();
-
-  /*
-    Floor starts at ~65% room height.
-    Pet stands slightly above the room bottom
-    because its own height occupies the space.
-  */
-
-  return rect.height - 150;
-}
-
 function petWidth() {
   return petZone.offsetWidth;
 }
 
 function petHeight() {
   return petZone.offsetHeight;
+}
+
+/*
+  Area lantai yang boleh diinjak.
+  Atas = mulai sedikit di bawah garis dinding/lantai.
+  Bawah = batas paling bawah agar pet tidak keluar layar.
+*/
+
+function floorTop() {
+  return room.clientHeight * 0.59;
+}
+
+function floorBottom() {
+  return room.clientHeight - petHeight() + 16;
 }
 
 function clearCatStates() {
@@ -146,7 +147,6 @@ function clearCatStates() {
 
 function setPetPixelPosition(x, y) {
   const rect = roomRect();
-
   const halfWidth = petWidth() / 2;
 
   const safeX = clamp(
@@ -157,8 +157,8 @@ function setPetPixelPosition(x, y) {
 
   const safeY = clamp(
     y,
-    0,
-    floorY()
+    floorTop(),
+    floorBottom()
   );
 
   petZone.style.left = `${safeX}px`;
@@ -167,21 +167,31 @@ function setPetPixelPosition(x, y) {
   petZone.style.transform = "translateX(-50%)";
 }
 
-function getPetLocalX() {
-  const rect = petZone.getBoundingClientRect();
-  const roomBox = roomRect();
-
-  return (
-    rect.left -
-    roomBox.left +
-    rect.width / 2
-  );
-}
-
 function setPetOnGroundAtX(x) {
   setPetPixelPosition(
     x,
-    floorY()
+    floorBottom()
+  );
+}
+
+function getPetLocalX() {
+  const petRect = petZone.getBoundingClientRect();
+  const roomBox = roomRect();
+
+  return (
+    petRect.left -
+    roomBox.left +
+    petRect.width / 2
+  );
+}
+
+function getPetLocalY() {
+  const petRect = petZone.getBoundingClientRect();
+  const roomBox = roomRect();
+
+  return (
+    petRect.top -
+    roomBox.top
   );
 }
 
@@ -193,6 +203,16 @@ function getObjectCenterX(element) {
     box.left -
     roomBox.left +
     box.width / 2
+  );
+}
+
+function getObjectTopY(element) {
+  const roomBox = roomRect();
+  const box = element.getBoundingClientRect();
+
+  return (
+    box.top -
+    roomBox.top
   );
 }
 
@@ -246,7 +266,7 @@ function setStat(name, value) {
 }
 
 /* =========================
-   MOOD
+   FACE / MOOD
 ========================= */
 
 function updateMood() {
@@ -286,7 +306,6 @@ function updateMood() {
 
 function say(text, duration = 1500) {
   speech.textContent = text;
-
   speech.classList.remove("hidden");
 
   clearTimeout(window.speechTimer);
@@ -304,7 +323,7 @@ function showEffect(symbol) {
       {
         opacity: 0,
         transform:
-          "translate(-50%, 5px) scale(.7)"
+          "translate(-50%, 6px) scale(.7)"
       },
       {
         opacity: 1,
@@ -335,11 +354,17 @@ function showEffect(symbol) {
 function applyPattern(pattern) {
   validPatterns.forEach(name => {
     cat.classList.remove(name);
-    portraitCat.classList.remove(name);
+
+    if (portraitCat) {
+      portraitCat.classList.remove(name);
+    }
   });
 
   cat.classList.add(pattern);
-  portraitCat.classList.add(pattern);
+
+  if (portraitCat) {
+    portraitCat.classList.add(pattern);
+  }
 
   document
     .querySelectorAll("[data-pattern]")
@@ -382,11 +407,12 @@ function faceTowards(targetX) {
 }
 
 /* =========================
-   WALK / RUN
+   2D WALK
 ========================= */
 
-function movePetToX(
+function walkToPoint(
   targetX,
+  targetY,
   {
     run = false,
     callback = null
@@ -400,32 +426,38 @@ function movePetToX(
     room.clientWidth - petWidth() / 2
   );
 
+  const safeY = clamp(
+    targetY,
+    floorTop(),
+    floorBottom()
+  );
+
+  const currentX = getPetLocalX();
+  const currentY = getPetLocalY();
+
   faceTowards(safeX);
 
   cat.classList.add(
     run ? "running" : "walking"
   );
 
-  const currentX = getPetLocalX();
-
-  const distance =
-    Math.abs(safeX - currentX);
+  const distance = Math.hypot(
+    safeX - currentX,
+    safeY - currentY
+  );
 
   const duration = run
-    ? clamp(distance * 1.35, 220, 650)
-    : clamp(distance * 2.2, 320, 900);
+    ? clamp(distance * 1.25, 220, 650)
+    : clamp(distance * 1.9, 300, 900);
 
-  petZone.style.transition =
-    `left ${duration}ms cubic-bezier(.22,.75,.25,1)`;
+  petZone.style.transition = `
+    left ${duration}ms cubic-bezier(.22,.75,.25,1),
+    top ${duration}ms cubic-bezier(.22,.75,.25,1)
+  `;
 
-  petZone.style.top =
-    `${floorY()}px`;
-
-  petZone.style.bottom =
-    "auto";
-
-  petZone.style.left =
-    `${safeX}px`;
+  petZone.style.left = `${safeX}px`;
+  petZone.style.top = `${safeY}px`;
+  petZone.style.bottom = "auto";
 
   setTimeout(() => {
     cat.classList.remove(
@@ -433,12 +465,31 @@ function movePetToX(
       "walking"
     );
 
-    if (callback) callback();
+    if (callback) {
+      callback();
+    }
   }, duration);
 }
 
+function movePetToX(
+  targetX,
+  {
+    run = false,
+    callback = null
+  } = {}
+) {
+  walkToPoint(
+    targetX,
+    getPetLocalY(),
+    {
+      run,
+      callback
+    }
+  );
+}
+
 /* =========================
-   COLLISION / WALKABLE FLOOR
+   BLOCKING FURNITURE
 ========================= */
 
 function getBlockingRects() {
@@ -448,28 +499,30 @@ function getBlockingRects() {
     bed,
     foodBowl,
     bath
-  ].map(element => {
-    const rect =
-      element.getBoundingClientRect();
+  ]
+    .filter(Boolean)
+    .map(element => {
+      const rect =
+        element.getBoundingClientRect();
 
-    return {
-      left:
-        rect.left -
-        roomBox.left,
+      return {
+        left:
+          rect.left -
+          roomBox.left,
 
-      right:
-        rect.right -
-        roomBox.left,
+        right:
+          rect.right -
+          roomBox.left,
 
-      top:
-        rect.top -
-        roomBox.top,
+        top:
+          rect.top -
+          roomBox.top,
 
-      bottom:
-        rect.bottom -
-        roomBox.top
-    };
-  });
+        bottom:
+          rect.bottom -
+          roomBox.top
+      };
+    });
 }
 
 function isBlockedPoint(x, y) {
@@ -477,13 +530,63 @@ function isBlockedPoint(x, y) {
 
   return blocks.some(rect => {
     return (
-      x > rect.left - 20 &&
-      x < rect.right + 20 &&
+      x > rect.left - 22 &&
+      x < rect.right + 22 &&
       y > rect.top - 30 &&
-      y < rect.bottom + 20
+      y < rect.bottom + 25
     );
   });
 }
+
+/* =========================
+   CLICK FLOOR TO WALK
+========================= */
+
+room.addEventListener("click", event => {
+  if (
+    busy ||
+    catDragging ||
+    ballDragging
+  ) {
+    return;
+  }
+
+  if (
+    event.target.closest(".furniture") ||
+    event.target.closest("#pixelCat") ||
+    event.target.closest("#ball")
+  ) {
+    return;
+  }
+
+  const rect = roomRect();
+
+  const targetX =
+    event.clientX - rect.left;
+
+  const targetY =
+    event.clientY - rect.top;
+
+  if (targetY < floorTop()) {
+    say("can't climb the wall!");
+    return;
+  }
+
+  if (
+    isBlockedPoint(
+      targetX,
+      targetY
+    )
+  ) {
+    say("something's there!");
+    return;
+  }
+
+  walkToPoint(
+    targetX,
+    targetY
+  );
+});
 
 /* =========================
    DRAG CAT
@@ -516,7 +619,10 @@ cat.addEventListener(
 
     clearCatStates();
 
-    cat.classList.add("carried");
+    cat.classList.add(
+      "carried"
+    );
+
     petZone.classList.add(
       "is-carried"
     );
@@ -551,10 +657,16 @@ cat.addEventListener(
       roomBox.width - petWidth() / 2
     );
 
+    /*
+      Saat DIANGKAT boleh ada di atas lantai,
+      supaya memang terasa sedang diangkat.
+      Nanti saat dilepas baru jatuh.
+    */
+
     desiredDragY = clamp(
       desiredDragY,
       0,
-      floorY()
+      floorBottom()
     );
 
     if (!dragFrame) {
@@ -574,10 +686,31 @@ function updateDragFrame() {
   petZone.style.transition =
     "none";
 
-  setPetPixelPosition(
+  const rect = roomRect();
+
+  const safeX = clamp(
     desiredDragX,
-    desiredDragY
+    petWidth() / 2,
+    rect.width - petWidth() / 2
   );
+
+  const safeY = clamp(
+    desiredDragY,
+    0,
+    floorBottom()
+  );
+
+  petZone.style.left =
+    `${safeX}px`;
+
+  petZone.style.top =
+    `${safeY}px`;
+
+  petZone.style.bottom =
+    "auto";
+
+  petZone.style.transform =
+    "translateX(-50%)";
 }
 
 function stopCatDrag(event) {
@@ -633,33 +766,25 @@ function startGravityDrop() {
   let velocityY = 0;
 
   function fall() {
-    const rect =
-      petZone.getBoundingClientRect();
+    const currentX =
+      getPetLocalX();
 
-    const roomBox = roomRect();
+    let currentY =
+      getPetLocalY();
 
-    let localX =
-      rect.left -
-      roomBox.left +
-      rect.width / 2;
+    velocityY += 0.95;
 
-    let localY =
-      rect.top -
-      roomBox.top;
-
-    velocityY += 1.1;
-
-    localY += velocityY;
+    currentY += velocityY;
 
     const ground =
-      floorY();
+      floorBottom();
 
-    if (localY >= ground) {
-      localY = ground;
+    if (currentY >= ground) {
+      currentY = ground;
 
       setPetPixelPosition(
-        localX,
-        localY
+        currentX,
+        currentY
       );
 
       cat.classList.add(
@@ -677,17 +802,28 @@ function startGravityDrop() {
       return;
     }
 
-    setPetPixelPosition(
-      localX,
-      localY
-    );
+    petZone.style.transition =
+      "none";
+
+    petZone.style.left =
+      `${currentX}px`;
+
+    petZone.style.top =
+      `${currentY}px`;
+
+    petZone.style.bottom =
+      "auto";
 
     gravityAnimationId =
-      requestAnimationFrame(fall);
+      requestAnimationFrame(
+        fall
+      );
   }
 
   gravityAnimationId =
-    requestAnimationFrame(fall);
+    requestAnimationFrame(
+      fall
+    );
 }
 
 /* =========================
@@ -719,63 +855,6 @@ function petCat() {
 }
 
 /* =========================
-   CLICK FLOOR TO WALK
-========================= */
-
-room.addEventListener(
-  "click",
-  event => {
-    if (
-      busy ||
-      catDragging ||
-      ballDragging
-    ) {
-      return;
-    }
-
-    if (
-      event.target.closest(
-        ".furniture"
-      ) ||
-      event.target.closest(
-        "#pixelCat"
-      ) ||
-      event.target.closest(
-        "#ball"
-      )
-    ) {
-      return;
-    }
-
-    const rect = roomRect();
-
-    const x =
-      event.clientX -
-      rect.left;
-
-    const y =
-      event.clientY -
-      rect.top;
-
-    /*
-      Only floor area is walkable.
-    */
-
-    if (y < rect.height * 0.61) {
-      say("can't go there!");
-      return;
-    }
-
-    if (isBlockedPoint(x, y)) {
-      say("something's there!");
-      return;
-    }
-
-    movePetToX(x);
-  }
-);
-
-/* =========================
    FOOD
 ========================= */
 
@@ -789,10 +868,17 @@ foodBowl.addEventListener(
     busy = true;
 
     const targetX =
-      getObjectCenterX(foodBowl);
+      getObjectCenterX(
+        foodBowl
+      );
 
-    movePetToX(
+    /*
+      Datang ke area dekat mangkuk.
+    */
+
+    walkToPoint(
       targetX,
+      floorBottom() - 15,
       {
         callback: () => {
           clearCatStates();
@@ -801,7 +887,10 @@ foodBowl.addEventListener(
             "eating"
           );
 
-          say("nom nom...", 2200);
+          say(
+            "nom nom...",
+            2200
+          );
 
           let bites = 0;
 
@@ -814,8 +903,12 @@ foodBowl.addEventListener(
                   ? "scale(.72)"
                   : "scale(1)";
 
+              showEffect("♪");
+
               if (bites >= 4) {
-                clearInterval(interval);
+                clearInterval(
+                  interval
+                );
 
                 bowlFood.style.opacity =
                   ".25";
@@ -842,14 +935,7 @@ foodBowl.addEventListener(
                   bowlFood.style.opacity =
                     "1";
 
-                  movePetToX(
-                    room.clientWidth / 2,
-                    {
-                      callback: () => {
-                        busy = false;
-                      }
-                    }
-                  );
+                  busy = false;
                 }, 400);
               }
             }, 420);
@@ -876,34 +962,30 @@ bed.addEventListener(
     const bedBox =
       bed.getBoundingClientRect();
 
-    /*
-      Walk to front edge first.
-    */
-
     const approachX =
       bedBox.right -
       roomBox.left -
-      35;
+      25;
 
-    movePetToX(
+    const approachY =
+      floorBottom() - 10;
+
+    walkToPoint(
       approachX,
+      approachY,
       {
         callback: () => {
           clearCatStates();
 
-          /*
-            Then snap smoothly onto mattress.
-          */
-
           const sleepX =
             bedBox.left -
             roomBox.left +
-            bedBox.width * 0.58;
+            bedBox.width * 0.57;
 
           const sleepY =
             bedBox.top -
             roomBox.top -
-            18;
+            12;
 
           petZone.style.transition =
             "left .35s ease, top .35s ease";
@@ -928,7 +1010,10 @@ bed.addEventListener(
             "sleeping"
           );
 
-          say("zzz...", 4500);
+          say(
+            "zzz...",
+            4500
+          );
 
           showEffect("Z");
 
@@ -951,15 +1036,19 @@ bed.addEventListener(
 
             clearCatStates();
 
+            const exitX =
+              bedBox.right -
+              roomBox.left +
+              40;
+
+            setPetPixelPosition(
+              exitX,
+              floorBottom()
+            );
+
             say("morning!");
 
             updateUI();
-
-            setPetOnGroundAtX(
-              bedBox.right -
-              roomBox.left +
-              40
-            );
 
             busy = false;
           }, 4500);
@@ -989,10 +1078,11 @@ bath.addEventListener(
     const approachX =
       bathBox.left -
       roomBox.left -
-      35;
+      30;
 
-    movePetToX(
+    walkToPoint(
       approachX,
+      floorBottom() - 10,
       {
         callback: () => {
           clearCatStates();
@@ -1005,10 +1095,10 @@ bath.addEventListener(
           const bathY =
             bathBox.top -
             roomBox.top +
-            5;
+            8;
 
           petZone.style.transition =
-            "left .32s ease, top .32s ease";
+            "left .3s ease, top .3s ease";
 
           petZone.style.left =
             `${bathX}px`;
@@ -1027,7 +1117,16 @@ bath.addEventListener(
             "active"
           );
 
-          say("splash!", 3000);
+          say(
+            "splash!",
+            3000
+          );
+
+          showEffect("○");
+
+          setTimeout(() => {
+            showEffect("✦");
+          }, 900);
 
           setTimeout(() => {
             data.cleanliness =
@@ -1048,15 +1147,19 @@ bath.addEventListener(
 
             clearCatStates();
 
+            const exitX =
+              bathBox.left -
+              roomBox.left -
+              40;
+
+            setPetPixelPosition(
+              exitX,
+              floorBottom()
+            );
+
             say("fresh!");
 
             updateUI();
-
-            setPetOnGroundAtX(
-              bathBox.left -
-              roomBox.left -
-              45
-            );
 
             busy = false;
           }, 3000);
@@ -1067,7 +1170,7 @@ bath.addEventListener(
 );
 
 /* =========================
-   BALL
+   BALL DRAG
 ========================= */
 
 ball.addEventListener(
@@ -1171,10 +1274,14 @@ function throwBall() {
   busy = true;
 
   let x =
-    parseFloat(ball.style.left);
+    parseFloat(
+      ball.style.left
+    );
 
   let y =
-    parseFloat(ball.style.top);
+    parseFloat(
+      ball.style.top
+    );
 
   let vx =
     ballVX * 1.45;
@@ -1190,7 +1297,7 @@ function throwBall() {
     vy = -6;
   }
 
-  const gravity = 0.5;
+  const gravity = 0.48;
 
   function physics() {
     const box = roomRect();
@@ -1270,7 +1377,7 @@ function throwBall() {
 }
 
 /* =========================
-   CHASE
+   CHASE BALL
 ========================= */
 
 function chaseBall(ballScreenX) {
@@ -1280,10 +1387,25 @@ function chaseBall(ballScreenX) {
     ballScreenX -
     box.left;
 
+  /*
+    Bola berhenti di lantai.
+    Kita clamp agar pet ngejar di area lantai.
+  */
+
+  const targetX = clamp(
+    x,
+    petWidth() / 2,
+    room.clientWidth - petWidth() / 2
+  );
+
+  const targetY =
+    floorBottom() - 5;
+
   say("BALL!!");
 
-  movePetToX(
-    x,
+  walkToPoint(
+    targetX,
+    targetY,
     {
       run: true,
 
@@ -1409,8 +1531,9 @@ function resetPet() {
 
   clearCatStates();
 
-  setPetOnGroundAtX(
-    room.clientWidth / 2
+  setPetPixelPosition(
+    room.clientWidth / 2,
+    floorBottom()
   );
 
   cat.style.scale = "1 1";
@@ -1423,7 +1546,7 @@ function resetPet() {
 }
 
 /* =========================
-   IDLE BEHAVIOUR
+   IDLE BEHAVIOR
 ========================= */
 
 function scheduleIdleBehaviour() {
@@ -1439,8 +1562,11 @@ function scheduleIdleBehaviour() {
       return;
     }
 
-    const random =
-      Math.random();
+    if (data.hunger < 25) {
+      say("hungry...");
+      scheduleIdleBehaviour();
+      return;
+    }
 
     if (data.energy < 20) {
       cat.classList.add(
@@ -1448,42 +1574,77 @@ function scheduleIdleBehaviour() {
       );
 
       say("sleepy...");
+
+      setTimeout(() => {
+        cat.classList.remove(
+          "sitting"
+        );
+      }, 2500);
+
+      scheduleIdleBehaviour();
+      return;
     }
 
-    else if (data.hunger < 25) {
-      say("hungry...");
-    }
+    const random =
+      Math.random();
 
-    else if (random < 0.25) {
+    if (random < 0.25) {
       cat.classList.add(
         "sitting"
       );
 
       say("mrrp");
+
+      setTimeout(() => {
+        cat.classList.remove(
+          "sitting"
+        );
+      }, 2200);
     }
 
-    else if (random < 0.55) {
-      const targetX =
+    else if (random < 0.65) {
+      const randomX =
         room.clientWidth *
         (
-          0.25 +
-          Math.random() * 0.5
+          0.18 +
+          Math.random() * 0.64
         );
 
-      movePetToX(targetX);
+      const randomY =
+        floorTop() +
+        Math.random() *
+        (
+          floorBottom() -
+          floorTop()
+        );
+
+      if (
+        !isBlockedPoint(
+          randomX,
+          randomY
+        )
+      ) {
+        walkToPoint(
+          randomX,
+          randomY
+        );
+      }
     }
 
     else {
+      const messages = [
+        "meow~",
+        "human?",
+        "pet me",
+        "...",
+        "play?"
+      ];
+
       say(
-        [
-          "meow~",
-          "human?",
-          "pet me",
-          "...",
-          "play?"
-        ][
+        messages[
           Math.floor(
-            Math.random() * 5
+            Math.random() *
+            messages.length
           )
         ]
       );
@@ -1495,7 +1656,7 @@ function scheduleIdleBehaviour() {
 }
 
 /* =========================
-   DECAY
+   STAT DECAY
 ========================= */
 
 setInterval(() => {
@@ -1530,8 +1691,9 @@ setInterval(() => {
 updateUI();
 
 requestAnimationFrame(() => {
-  setPetOnGroundAtX(
-    room.clientWidth / 2
+  setPetPixelPosition(
+    room.clientWidth / 2,
+    floorBottom()
   );
 });
 
