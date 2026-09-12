@@ -4,266 +4,346 @@ const defaultPet = {
   happiness: 80,
   energy: 80,
   cleanliness: 80,
-  coins: 100,
-  xp: 0,
   level: 1,
-  lastUpdate: Date.now()
+  xp: 0,
+  coins: 100
 };
 
-let pet = loadPet();
+let petData =
+  JSON.parse(localStorage.getItem("mochiPet")) || {...defaultPet};
 
-function loadPet() {
-  const saved = localStorage.getItem("virtualPet");
+const pet = document.getElementById("pet");
+const petWrapper = document.getElementById("petWrapper");
+const speech = document.getElementById("speech");
+const effect = document.getElementById("effect");
 
-  if (saved) {
-    const data = JSON.parse(saved);
-    applyOfflineDecay(data);
-    return data;
-  }
-
-  return { ...defaultPet };
+function save() {
+  localStorage.setItem("mochiPet", JSON.stringify(petData));
 }
 
-function savePet() {
-  pet.lastUpdate = Date.now();
-  localStorage.setItem("virtualPet", JSON.stringify(pet));
+function clamp(n) {
+  return Math.max(0, Math.min(100, n));
 }
 
-function clamp(value) {
-  return Math.max(0, Math.min(100, value));
-}
-
-function applyOfflineDecay(data) {
-  const now = Date.now();
-  const last = data.lastUpdate || now;
-
-  const minutesAway = Math.floor((now - last) / 60000);
-
-  if (minutesAway <= 0) return;
-
-  const decay = Math.min(minutesAway, 30);
-
-  data.hunger = clamp(data.hunger - decay * 0.6);
-  data.happiness = clamp(data.happiness - decay * 0.3);
-  data.energy = clamp(data.energy - decay * 0.4);
-  data.cleanliness = clamp(data.cleanliness - decay * 0.25);
-
-  data.lastUpdate = now;
-}
-
-function updateUI() {
-  document.getElementById("petName").textContent = pet.name;
-
-  document.getElementById("hungerText").textContent =
-    Math.round(pet.hunger) + "%";
-
-  document.getElementById("happinessText").textContent =
-    Math.round(pet.happiness) + "%";
-
-  document.getElementById("energyText").textContent =
-    Math.round(pet.energy) + "%";
-
-  document.getElementById("cleanlinessText").textContent =
-    Math.round(pet.cleanliness) + "%";
+function update() {
+  document.getElementById("petName").textContent = petData.name;
+  document.getElementById("level").textContent = petData.level;
+  document.getElementById("coins").textContent = petData.coins;
 
   document.getElementById("hungerBar").style.width =
-    pet.hunger + "%";
+    petData.hunger + "%";
 
-  document.getElementById("happinessBar").style.width =
-    pet.happiness + "%";
+  document.getElementById("happyBar").style.width =
+    petData.happiness + "%";
 
   document.getElementById("energyBar").style.width =
-    pet.energy + "%";
+    petData.energy + "%";
 
-  document.getElementById("cleanlinessBar").style.width =
-    pet.cleanliness + "%";
-
-  document.getElementById("coins").textContent = pet.coins;
-  document.getElementById("xp").textContent = pet.xp;
-  document.getElementById("level").textContent = pet.level;
+  document.getElementById("cleanBar").style.width =
+    petData.cleanliness + "%";
 
   updateMood();
-  updateStatus();
 
-  savePet();
+  save();
+}
+
+function say(text) {
+  speech.textContent = text;
+  speech.classList.remove("hidden");
+
+  clearTimeout(window.speechTimer);
+
+  window.speechTimer = setTimeout(() => {
+    speech.classList.add("hidden");
+  }, 1800);
+}
+
+function showEffect(symbol) {
+  effect.textContent = symbol;
+
+  effect.animate(
+    [
+      {opacity: 1, transform: "translate(-50%,0) scale(.7)"},
+      {opacity: 1, transform: "translate(-50%,-25px) scale(1.2)"},
+      {opacity: 0, transform: "translate(-50%,-60px) scale(.8)"}
+    ],
+    {
+      duration: 900
+    }
+  );
+
+  setTimeout(() => {
+    effect.textContent = "";
+  }, 900);
 }
 
 function updateMood() {
-  const emoji = document.getElementById("petEmoji");
-  const mood = document.getElementById("petMood");
-
-  if (pet.hunger <= 20) {
-    emoji.textContent = "🙀";
-    mood.textContent = `${pet.name} is very hungry!`;
+  if (petData.energy < 20) {
+    pet.textContent = "😿";
     return;
   }
 
-  if (pet.energy <= 20) {
-    emoji.textContent = "😿";
-    mood.textContent = `${pet.name} is exhausted.`;
+  if (petData.hunger < 20) {
+    pet.textContent = "🙀";
     return;
   }
 
-  if (pet.cleanliness <= 20) {
-    emoji.textContent = "😾";
-    mood.textContent = `${pet.name} needs a bath.`;
+  if (petData.happiness > 85) {
+    pet.textContent = "😻";
     return;
   }
 
-  if (pet.happiness <= 20) {
-    emoji.textContent = "😿";
-    mood.textContent = `${pet.name} wants some attention.`;
-    return;
-  }
-
-  if (
-    pet.hunger >= 75 &&
-    pet.happiness >= 75 &&
-    pet.energy >= 75 &&
-    pet.cleanliness >= 75
-  ) {
-    emoji.textContent = "😻";
-    mood.textContent = `${pet.name} is feeling amazing!`;
-    return;
-  }
-
-  emoji.textContent = "🐱";
-  mood.textContent = `${pet.name} is doing okay.`;
+  pet.textContent = "🐱";
 }
 
-function updateStatus() {
-  const status = document.getElementById("status");
+/* PETTING */
 
-  const average =
-    (pet.hunger +
-      pet.happiness +
-      pet.energy +
-      pet.cleanliness) / 4;
+pet.addEventListener("click", () => {
+  petData.happiness = clamp(petData.happiness + 4);
 
-  if (average >= 75) {
-    status.textContent = "Great";
-  } else if (average >= 50) {
-    status.textContent = "Healthy";
-  } else if (average >= 25) {
-    status.textContent = "Needs Attention";
-  } else {
-    status.textContent = "Critical";
-  }
-}
+  showEffect("💗");
+  say("prrrr ♡");
 
-function addXP(amount) {
-  pet.xp += amount;
-
-  if (pet.xp >= 100) {
-    pet.xp -= 100;
-    pet.level++;
-    pet.coins += 50;
-
-    alert(
-      `Level up! ${pet.name} is now level ${pet.level}. You earned 50 coins!`
-    );
-  }
-}
-
-function feedPet() {
-  if (pet.coins < 10) {
-    alert("You don't have enough coins to buy food!");
-    return;
-  }
-
-  pet.coins -= 10;
-  pet.hunger = clamp(pet.hunger + 25);
-  pet.happiness = clamp(pet.happiness + 3);
-
-  addXP(10);
-
-  showAction(`${pet.name} enjoyed the food! 🍗`);
-
-  updateUI();
-}
-
-function playPet() {
-  if (pet.energy < 15) {
-    showAction(`${pet.name} is too tired to play.`);
-    return;
-  }
-
-  pet.happiness = clamp(pet.happiness + 20);
-  pet.energy = clamp(pet.energy - 12);
-  pet.hunger = clamp(pet.hunger - 5);
-
-  pet.coins += 5;
-
-  addXP(15);
-
-  showAction(`${pet.name} had fun playing! 🎾`);
-
-  updateUI();
-}
-
-function sleepPet() {
-  pet.energy = clamp(pet.energy + 35);
-  pet.hunger = clamp(pet.hunger - 8);
-
-  addXP(8);
-
-  showAction(`${pet.name} had a nice nap. 😴`);
-
-  updateUI();
-}
-
-function cleanPet() {
-  pet.cleanliness = clamp(pet.cleanliness + 40);
-  pet.happiness = clamp(pet.happiness + 5);
-
-  addXP(8);
-
-  showAction(`${pet.name} is clean and fresh! 🫧`);
-
-  updateUI();
-}
-
-function renamePet() {
-  const newName = prompt("What should your pet be called?", pet.name);
-
-  if (!newName) return;
-
-  const cleanName = newName.trim();
-
-  if (cleanName.length === 0) return;
-
-  pet.name = cleanName.substring(0, 15);
-
-  updateUI();
-}
-
-function showAction(message) {
-  const mood = document.getElementById("petMood");
-
-  mood.textContent = message;
+  pet.classList.add("happy");
 
   setTimeout(() => {
-    updateMood();
+    pet.classList.remove("happy");
   }, 1500);
-}
 
-function naturalDecay() {
-  pet.hunger = clamp(pet.hunger - 1);
-  pet.happiness = clamp(pet.happiness - 0.5);
-  pet.energy = clamp(pet.energy - 0.7);
-  pet.cleanliness = clamp(pet.cleanliness - 0.4);
-
-  updateUI();
-}
-
-document.getElementById("petEmoji").addEventListener("click", () => {
-  pet.happiness = clamp(pet.happiness + 2);
-
-  showAction(`${pet.name} loves the head pats! 💕`);
-
-  updateUI();
+  update();
 });
 
-setInterval(naturalDecay, 60000);
+/* DRAG ITEMS */
 
-updateUI();
+document.querySelectorAll(".item").forEach(item => {
+
+  item.addEventListener("dragstart", event => {
+    event.dataTransfer.setData(
+      "item",
+      item.dataset.item
+    );
+  });
+
+});
+
+petWrapper.addEventListener("dragover", event => {
+  event.preventDefault();
+});
+
+petWrapper.addEventListener("drop", event => {
+
+  event.preventDefault();
+
+  const item =
+    event.dataTransfer.getData("item");
+
+  if (item === "food") {
+    eatFood("🍗", 25);
+  }
+
+  if (item === "fish") {
+    eatFood("🐟", 35);
+  }
+
+  if (item === "ball") {
+    playBall();
+  }
+
+});
+
+function eatFood(food, amount) {
+
+  petData.hunger =
+    clamp(petData.hunger + amount);
+
+  petData.happiness =
+    clamp(petData.happiness + 5);
+
+  showEffect(food);
+
+  say("nom nom!");
+
+  pet.classList.add("happy");
+
+  setTimeout(() => {
+    pet.classList.remove("happy");
+  }, 1200);
+
+  gainXP(10);
+
+  update();
+}
+
+function playBall() {
+
+  if (petData.energy < 15) {
+    say("too tired...");
+    return;
+  }
+
+  petData.happiness =
+    clamp(petData.happiness + 20);
+
+  petData.energy =
+    clamp(petData.energy - 12);
+
+  petData.hunger =
+    clamp(petData.hunger - 5);
+
+  showEffect("🎾");
+
+  say("play!!");
+
+  pet.classList.add("happy");
+
+  setTimeout(() => {
+    pet.classList.remove("happy");
+  }, 1500);
+
+  gainXP(15);
+
+  update();
+}
+
+/* BED */
+
+document.getElementById("bed").addEventListener("click", () => {
+
+  petWrapper.style.left = "18%";
+  petWrapper.style.bottom = "80px";
+
+  pet.classList.add("sleeping");
+
+  pet.textContent = "😴";
+
+  say("zzz...");
+
+  showEffect("💤");
+
+  setTimeout(() => {
+
+    petData.energy =
+      clamp(petData.energy + 35);
+
+    petData.hunger =
+      clamp(petData.hunger - 7);
+
+    pet.classList.remove("sleeping");
+
+    petWrapper.style.left = "50%";
+    petWrapper.style.bottom = "82px";
+
+    gainXP(8);
+
+    update();
+
+    say("good morning!");
+
+  }, 3000);
+
+});
+
+/* BATH */
+
+document.getElementById("bath").addEventListener("click", () => {
+
+  petWrapper.style.left = "82%";
+
+  showEffect("🫧");
+
+  say("splash!");
+
+  petData.cleanliness =
+    clamp(petData.cleanliness + 40);
+
+  petData.happiness =
+    clamp(petData.happiness + 4);
+
+  setTimeout(() => {
+    petWrapper.style.left = "50%";
+  }, 1500);
+
+  gainXP(8);
+
+  update();
+});
+
+/* LEVEL */
+
+function gainXP(amount) {
+
+  petData.xp += amount;
+
+  if (petData.xp >= 100) {
+
+    petData.xp -= 100;
+
+    petData.level++;
+
+    petData.coins += 50;
+
+    say("level up! ⭐");
+
+    showEffect("⭐");
+  }
+}
+
+/* RENAME */
+
+function renamePet() {
+
+  const name =
+    prompt("Name your pet:", petData.name);
+
+  if (!name) return;
+
+  petData.name =
+    name.trim().substring(0, 14);
+
+  update();
+}
+
+/* PET TALKS RANDOMLY */
+
+const messages = [
+  "meow~",
+  "pet me!",
+  "i'm bored...",
+  "hello human ♡",
+  "food?",
+  "mrrp!"
+];
+
+setInterval(() => {
+
+  if (Math.random() < .35) {
+
+    const random =
+      messages[Math.floor(Math.random() * messages.length)];
+
+    say(random);
+  }
+
+}, 10000);
+
+/* NATURAL DECAY */
+
+setInterval(() => {
+
+  petData.hunger =
+    clamp(petData.hunger - 2);
+
+  petData.happiness =
+    clamp(petData.happiness - 1);
+
+  petData.energy =
+    clamp(petData.energy - 1);
+
+  petData.cleanliness =
+    clamp(petData.cleanliness - .7);
+
+  update();
+
+}, 60000);
+
+update();
