@@ -3,138 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Pet</title>
+  <title>Mochi Room</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="game-container">
+  <main class="game">
 
-    <header class="topbar">
+    <header class="hud">
       <div>
-        <p class="eyebrow">VIRTUAL PET</p>
-        <h1>Take care of your little friend</h1>
+        <span class="tiny">MOCHI ROOM</span>
+        <h1 id="petName">Mochi</h1>
       </div>
 
-      <div class="coin-box">
-        🪙 <span id="coins">100</span>
+      <div class="hud-right">
+        <div>⭐ Lv <span id="level">1</span></div>
+        <div>🪙 <span id="coins">100</span></div>
       </div>
     </header>
 
-    <section class="pet-card">
+    <section class="room" id="room">
 
-      <div class="pet-top">
-        <div>
-          <p class="label">PET NAME</p>
-          <h2 id="petName">Mochi</h2>
-        </div>
-
-        <button class="rename-btn" onclick="renamePet()">
-          Rename
-        </button>
+      <div class="window">
+        <div class="sky">☁️</div>
       </div>
 
-      <div class="pet-area">
+      <div class="wall-decoration">♡</div>
 
-        <div class="pet-emoji" id="petEmoji">
-          🐱
-        </div>
-
-        <p class="mood" id="petMood">
-          Mochi is feeling happy!
-        </p>
-
+      <div class="speech hidden" id="speech">
+        meow!
       </div>
 
-      <div class="stats">
-
-        <div class="stat">
-          <div class="stat-header">
-            <span>🍗 Hunger</span>
-            <span id="hungerText">80%</span>
-          </div>
-          <div class="bar">
-            <div class="fill" id="hungerBar"></div>
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-header">
-            <span>💖 Happiness</span>
-            <span id="happinessText">80%</span>
-          </div>
-          <div class="bar">
-            <div class="fill" id="happinessBar"></div>
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-header">
-            <span>⚡ Energy</span>
-            <span id="energyText">80%</span>
-          </div>
-          <div class="bar">
-            <div class="fill" id="energyBar"></div>
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-header">
-            <span>🫧 Cleanliness</span>
-            <span id="cleanlinessText">80%</span>
-          </div>
-          <div class="bar">
-            <div class="fill" id="cleanlinessBar"></div>
-          </div>
-        </div>
-
+      <div class="pet-wrapper" id="petWrapper">
+        <div class="effect" id="effect"></div>
+        <div class="pet" id="pet">🐱</div>
       </div>
 
-      <div class="actions">
-
-        <button onclick="feedPet()">
-          🍗 Feed
-        </button>
-
-        <button onclick="playPet()">
-          🎾 Play
-        </button>
-
-        <button onclick="sleepPet()">
-          😴 Sleep
-        </button>
-
-        <button onclick="cleanPet()">
-          🫧 Clean
-        </button>
-
+      <div class="bed" id="bed">
+        <span>🛏️</span>
+        <small>sleep</small>
       </div>
+
+      <div class="bath" id="bath">
+        <span>🛁</span>
+        <small>bath</small>
+      </div>
+
+      <div class="floor-shadow"></div>
 
     </section>
 
-    <section class="info-card">
-
-      <div>
-        <p class="label">LEVEL</p>
-        <strong id="level">1</strong>
+    <section class="stats">
+      <div class="stat">
+        <span>🍗</span>
+        <div class="bar"><div id="hungerBar"></div></div>
       </div>
 
-      <div>
-        <p class="label">XP</p>
-        <strong><span id="xp">0</span> / 100</strong>
+      <div class="stat">
+        <span>💗</span>
+        <div class="bar"><div id="happyBar"></div></div>
       </div>
 
-      <div>
-        <p class="label">STATUS</p>
-        <strong id="status">Healthy</strong>
+      <div class="stat">
+        <span>⚡</span>
+        <div class="bar"><div id="energyBar"></div></div>
       </div>
+
+      <div class="stat">
+        <span>🫧</span>
+        <div class="bar"><div id="cleanBar"></div></div>
+      </div>
+    </section>
+
+    <section class="inventory">
+
+      <div class="item" draggable="true" data-item="food">
+        <span>🍗</span>
+        <small>Food</small>
+      </div>
+
+      <div class="item" draggable="true" data-item="ball">
+        <span>🎾</span>
+        <small>Ball</small>
+      </div>
+
+      <div class="item" draggable="true" data-item="fish">
+        <span>🐟</span>
+        <small>Fish</small>
+      </div>
+
+      <button class="rename" onclick="renamePet()">
+        ✏️ Rename
+      </button>
 
     </section>
+
+    <p class="hint">
+      drag food or toys to your pet • click the pet to pet them
+    </p>
 
   </main>
 
   <script src="script.js"></script>
-
 </body>
 </html>
