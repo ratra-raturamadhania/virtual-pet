@@ -1,529 +1,1800 @@
 const defaultData = {
+
   name: "Mochi",
+
   hunger: 80,
+
   happiness: 80,
+
   energy: 80,
+
   cleanliness: 80,
+
   level: 1,
+
   xp: 0,
+
   coins: 100,
+
   pattern: "orange"
 };
 
-let data =
-  JSON.parse(localStorage.getItem("pixelPetData")) ||
-  { ...defaultData };
 
-const room = document.getElementById("room");
-const cat = document.getElementById("pixelCat");
-const petZone = document.getElementById("petZone");
-const speech = document.getElementById("speech");
-const effect = document.getElementById("floatingEffect");
-const ballBody = document.getElementById("ballBody");
+/* =========================
+   LOAD + FIX OLD SAVE
+========================= */
+
+let savedData = null;
+
+try {
+
+  savedData =
+    JSON.parse(
+      localStorage.getItem(
+        "pixelPetData"
+      )
+    );
+
+} catch (error) {
+
+  savedData = null;
+}
+
+
+/*
+  Spread defaultData FIRST.
+
+  So old saves that don't have
+  "pattern" automatically get orange.
+*/
+
+let data = {
+
+  ...defaultData,
+
+  ...(savedData || {})
+};
+
+
+/*
+  Extra safety:
+*/
+
+if (
+  ![
+    "orange",
+    "tuxedo",
+    "calico",
+    "gray"
+  ].includes(data.pattern)
+) {
+
+  data.pattern = "orange";
+}
+
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const room =
+  document.getElementById("room");
+
+const petZone =
+  document.getElementById("petZone");
+
+const cat =
+  document.getElementById("pixelCat");
+
+const shadow =
+  document.getElementById("petShadow");
+
+const speech =
+  document.getElementById("speech");
+
+const effect =
+  document.getElementById(
+    "floatingEffect"
+  );
+
+const ball =
+  document.getElementById("ball");
+
+const ballHome =
+  document.getElementById("ballHome");
+
+const bath =
+  document.getElementById("bath");
+
+const bowlFood =
+  document.getElementById(
+    "bowlFood"
+  );
+
+
+/* =========================
+   STATE
+========================= */
 
 let busy = false;
 
 let catDragging = false;
+
+let dragMoved = false;
+
 let catOffsetX = 0;
 let catOffsetY = 0;
 
 let ballDragging = false;
-let ballStartX = 0;
-let ballStartY = 0;
+
 let ballLastX = 0;
 let ballLastY = 0;
+
 let ballVX = 0;
 let ballVY = 0;
 
+let ballAnimationId = null;
+
+
+/* =========================
+   SAVE
+========================= */
+
 function save() {
+
   localStorage.setItem(
+
     "pixelPetData",
+
     JSON.stringify(data)
   );
 }
 
+
+/* =========================
+   HELPERS
+========================= */
+
 function clamp(value) {
-  return Math.max(0, Math.min(100, value));
+
+  return Math.max(
+    0,
+    Math.min(100, value)
+  );
 }
 
+
+function clearCatStates() {
+
+  cat.classList.remove(
+
+    "carried",
+    "drop-bounce",
+    "walking",
+    "running",
+    "happy",
+    "eating",
+    "sleeping",
+    "bathing"
+  );
+}
+
+
+function setFaceDirection(targetX) {
+
+  const catRect =
+    petZone.getBoundingClientRect();
+
+  const catCenter =
+    catRect.left +
+    catRect.width / 2;
+
+  if (targetX < catCenter) {
+
+    cat.classList.add(
+      "face-left"
+    );
+
+  } else {
+
+    cat.classList.remove(
+      "face-left"
+    );
+  }
+}
+
+
+/* =========================
+   UI
+========================= */
+
 function updateUI() {
-  document.getElementById("petName").textContent = data.name;
-  document.getElementById("level").textContent = data.level;
-  document.getElementById("xp").textContent = data.xp;
-  document.getElementById("coins").textContent = data.coins;
 
-  setStat("hunger", data.hunger);
-  setStat("happy", data.happiness);
-  setStat("energy", data.energy);
-  setStat("clean", data.cleanliness);
+  document.getElementById(
+    "petName"
+  ).textContent =
+    data.name;
 
-  setPattern(data.pattern);
+  document.getElementById(
+    "level"
+  ).textContent =
+    data.level;
+
+  document.getElementById(
+    "xp"
+  ).textContent =
+    data.xp;
+
+  document.getElementById(
+    "coins"
+  ).textContent =
+    data.coins;
+
+
+  setStat(
+    "hunger",
+    data.hunger
+  );
+
+  setStat(
+    "happy",
+    data.happiness
+  );
+
+  setStat(
+    "energy",
+    data.energy
+  );
+
+  setStat(
+    "clean",
+    data.cleanliness
+  );
+
+
+  applyPattern(
+    data.pattern
+  );
+
+  updateMood();
 
   save();
 }
 
-function setStat(name, value) {
-  document.getElementById(name + "Bar").style.width =
+
+function setStat(
+  name,
+  value
+) {
+
+  const bar =
+    document.getElementById(
+      name + "Bar"
+    );
+
+  const text =
+    document.getElementById(
+      name + "Text"
+    );
+
+
+  bar.style.width =
     value + "%";
 
-  document.getElementById(name + "Text").textContent =
+  text.textContent =
     Math.round(value);
+
+
+  if (value < 25) {
+
+    bar.style.background =
+      "#c95f59";
+
+  } else if (value < 50) {
+
+    bar.style.background =
+      "#d7a14f";
+
+  } else {
+
+    bar.style.background =
+      "#77a870";
+  }
 }
 
-function say(text, time = 1600) {
+
+/* =========================
+   MOOD FACE
+========================= */
+
+function updateMood() {
+
+  const eyes =
+    document.querySelectorAll(
+      ".eye"
+    );
+
+  const mouth =
+    document.querySelector(
+      ".mouth"
+    );
+
+
+  eyes.forEach(eye => {
+
+    eye.style.height = "8px";
+
+    eye.style.top = "24px";
+  });
+
+
+  mouth.style.width = "12px";
+
+  mouth.style.borderBottom =
+    "3px solid #4c302d";
+
+
+  if (data.energy < 20) {
+
+    eyes.forEach(eye => {
+
+      eye.style.height = "3px";
+
+      eye.style.top = "28px";
+    });
+  }
+
+
+  if (
+    data.happiness < 25 ||
+    data.hunger < 15
+  ) {
+
+    mouth.style.borderBottom =
+      "0";
+
+    mouth.style.borderTop =
+      "3px solid #4c302d";
+  }
+}
+
+
+/* =========================
+   SPEECH
+========================= */
+
+function say(
+  text,
+  duration = 1600
+) {
+
   speech.textContent = text;
-  speech.classList.remove("hidden");
 
-  clearTimeout(window.sayTimeout);
+  speech.classList.remove(
+    "hidden"
+  );
 
-  window.sayTimeout = setTimeout(() => {
-    speech.classList.add("hidden");
-  }, time);
+
+  clearTimeout(
+    window.petSpeechTimer
+  );
+
+
+  window.petSpeechTimer =
+    setTimeout(() => {
+
+      speech.classList.add(
+        "hidden"
+      );
+
+    }, duration);
 }
+
+
+/* =========================
+   FLOATING EFFECT
+========================= */
 
 function showEffect(symbol) {
+
   effect.textContent = symbol;
 
+
   effect.animate(
+
     [
+
       {
         opacity: 0,
-        transform: "translate(-50%, 10px)"
+
+        transform:
+          "translate(-50%, 10px) scale(.6)"
       },
+
       {
         opacity: 1,
-        transform: "translate(-50%, -10px)"
+
+        transform:
+          "translate(-50%, -10px) scale(1)"
       },
+
       {
         opacity: 0,
-        transform: "translate(-50%, -55px)"
+
+        transform:
+          "translate(-50%, -60px) scale(1.2)"
       }
+
     ],
+
     {
-      duration: 900
+      duration: 950,
+
+      easing: "ease-out"
     }
   );
 
+
   setTimeout(() => {
+
     effect.textContent = "";
-  }, 900);
+
+  }, 950);
 }
 
-/* CAT PATTERN */
 
-document
-  .querySelectorAll("[data-pattern]")
-  .forEach(button => {
-    button.addEventListener("click", () => {
-      data.pattern = button.dataset.pattern;
-      setPattern(data.pattern);
-      save();
-    });
-  });
+/* =========================
+   PATTERNS
+========================= */
 
-function setPattern(pattern) {
+function applyPattern(
+  pattern
+) {
+
   cat.classList.remove(
+
     "orange",
     "tuxedo",
     "calico",
     "gray"
   );
 
-  cat.classList.add(pattern);
+
+  cat.classList.add(
+    pattern || "orange"
+  );
+
+
+  document
+    .querySelectorAll(
+      "[data-pattern]"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+
+        "active-pattern",
+
+        button.dataset.pattern ===
+        pattern
+      );
+
+    });
 }
 
-/* CAT DRAG */
 
-cat.addEventListener("pointerdown", event => {
-  if (busy) return;
+document
+  .querySelectorAll(
+    "[data-pattern]"
+  )
+  .forEach(button => {
 
-  catDragging = true;
+    button.addEventListener(
+      "click",
+      () => {
 
-  cat.setPointerCapture(event.pointerId);
+        data.pattern =
+          button.dataset.pattern;
 
-  const rect = petZone.getBoundingClientRect();
+        applyPattern(
+          data.pattern
+        );
 
-  catOffsetX = event.clientX - rect.left;
-  catOffsetY = event.clientY - rect.top;
+        save();
 
-  cat.style.animation = "none";
-});
+        say("new look!");
 
-cat.addEventListener("pointermove", event => {
-  if (!catDragging) return;
+        showEffect("★");
+      }
+    );
 
-  const roomRect = room.getBoundingClientRect();
+  });
 
-  let x =
-    event.clientX -
-    roomRect.left -
-    catOffsetX +
-    petZone.offsetWidth / 2;
 
-  let y =
-    event.clientY -
-    roomRect.top -
-    catOffsetY;
+/* =========================
+   WALK
+========================= */
 
-  x = Math.max(
-    65,
-    Math.min(
-      roomRect.width - 65,
-      x
-    )
+function walkToPercent(
+  percent,
+  running = false,
+  callback = null
+) {
+
+  clearCatStates();
+
+
+  const roomRect =
+    room.getBoundingClientRect();
+
+
+  const currentRect =
+    petZone.getBoundingClientRect();
+
+
+  const currentCenter =
+    currentRect.left +
+    currentRect.width / 2;
+
+
+  const targetX =
+    roomRect.left +
+    roomRect.width *
+    percent / 100;
+
+
+  setFaceDirection(
+    targetX
   );
 
-  y = Math.max(
-    10,
-    Math.min(
-      roomRect.height - 150,
-      y
-    )
+
+  cat.classList.add(
+    running
+      ? "running"
+      : "walking"
   );
 
-  petZone.style.left = x + "px";
-  petZone.style.bottom = "auto";
-  petZone.style.top = y + "px";
-  petZone.style.transform = "translateX(-50%)";
-});
 
-cat.addEventListener("pointerup", event => {
-  if (!catDragging) return;
+  petZone.style.top = "";
 
-  catDragging = false;
+  petZone.style.bottom =
+    "79px";
 
-  cat.releasePointerCapture(event.pointerId);
 
-  cat.style.animation = "";
+  /*
+    Faster when chasing.
+  */
 
-  data.happiness =
-    clamp(data.happiness + 2);
+  petZone.style.transition =
+    running
+      ? "left .38s linear"
+      : "left .65s linear";
 
-  showEffect("♥");
-  say("mrrp!");
 
-  gainXP(2);
+  petZone.style.left =
+    percent + "%";
 
-  updateUI();
-});
 
-/* FOOD */
+  const distance =
+    Math.abs(
+      targetX -
+      currentCenter
+    );
 
-document
-  .getElementById("foodBowl")
-  .addEventListener("click", event => {
-    event.stopPropagation();
 
-    if (busy) return;
+  const duration =
+    running
+      ? Math.max(
+          250,
+          Math.min(
+            700,
+            distance * 1.4
+          )
+        )
 
-    busy = true;
+      : Math.max(
+          350,
+          Math.min(
+            900,
+            distance * 2
+          )
+        );
 
-    say("nom nom");
 
-    data.hunger =
-      clamp(data.hunger + 28);
+  setTimeout(() => {
 
-    data.happiness =
-      clamp(data.happiness + 4);
+    cat.classList.remove(
+      "running",
+      "walking"
+    );
 
-    gainXP(10);
 
-    showEffect("♪");
+    petZone.style.transition =
+      "left .65s linear";
 
-    updateUI();
 
-    setTimeout(() => {
-      busy = false;
-    }, 900);
-  });
+    if (callback) {
 
-/* BED */
+      callback();
+    }
 
-document
-  .getElementById("bed")
-  .addEventListener("click", event => {
-    event.stopPropagation();
+  }, duration);
+}
 
-    if (busy) return;
 
-    busy = true;
+/* =========================
+   CAT DRAG / PICK UP
+========================= */
 
-    say("zzz...", 2500);
-    showEffect("Z");
-
-    cat.style.transform =
-      "rotate(-8deg) scale(.95)";
-
-    setTimeout(() => {
-      data.energy =
-        clamp(data.energy + 35);
-
-      data.hunger =
-        clamp(data.hunger - 6);
-
-      gainXP(8);
-
-      cat.style.transform = "";
-
-      say("morning!");
-
-      updateUI();
-
-      busy = false;
-    }, 2600);
-  });
-
-/* BATH */
-
-document
-  .getElementById("bath")
-  .addEventListener("click", event => {
-    event.stopPropagation();
+cat.addEventListener(
+  "pointerdown",
+  event => {
 
     if (busy) return;
 
-    busy = true;
 
-    say("splash!");
-    showEffect("✦");
+    catDragging = true;
 
-    data.cleanliness =
-      clamp(data.cleanliness + 40);
+    dragMoved = false;
 
-    data.happiness =
-      clamp(data.happiness + 3);
 
-    gainXP(8);
+    cat.setPointerCapture(
+      event.pointerId
+    );
 
-    updateUI();
 
-    setTimeout(() => {
-      busy = false;
-    }, 900);
-  });
+    const petRect =
+      petZone.getBoundingClientRect();
 
-/* THROWABLE BALL */
 
-ballBody.addEventListener("pointerdown", event => {
-  ballDragging = true;
+    catOffsetX =
+      event.clientX -
+      petRect.left;
 
-  ballBody.setPointerCapture(event.pointerId);
 
-  ballStartX = event.clientX;
-  ballStartY = event.clientY;
+    catOffsetY =
+      event.clientY -
+      petRect.top;
 
-  ballLastX = event.clientX;
-  ballLastY = event.clientY;
 
-  ballBody.style.position = "fixed";
-  ballBody.style.zIndex = "1000";
-  ballBody.style.left =
-    event.clientX - 23 + "px";
-  ballBody.style.top =
-    event.clientY - 23 + "px";
-});
+    clearCatStates();
 
-ballBody.addEventListener("pointermove", event => {
-  if (!ballDragging) return;
 
-  ballVX = event.clientX - ballLastX;
-  ballVY = event.clientY - ballLastY;
+    cat.classList.add(
+      "carried"
+    );
 
-  ballLastX = event.clientX;
-  ballLastY = event.clientY;
 
-  ballBody.style.left =
-    event.clientX - 23 + "px";
+    petZone.classList.add(
+      "is-carried"
+    );
 
-  ballBody.style.top =
-    event.clientY - 23 + "px";
-});
 
-ballBody.addEventListener("pointerup", event => {
-  if (!ballDragging) return;
+    say("mrrp?");
+  }
+);
 
-  ballDragging = false;
 
-  ballBody.releasePointerCapture(event.pointerId);
+cat.addEventListener(
+  "pointermove",
+  event => {
 
-  throwBall();
-});
+    if (!catDragging) return;
 
-function throwBall() {
-  let x = parseFloat(ballBody.style.left);
-  let y = parseFloat(ballBody.style.top);
 
-  let vx = ballVX * 1.8;
-  let vy = ballVY * 1.8;
+    dragMoved = true;
 
-  const friction = 0.97;
-  const gravity = 0.55;
-
-  function animate() {
-    x += vx;
-    y += vy;
-
-    vy += gravity;
-
-    vx *= friction;
-    vy *= friction;
 
     const roomRect =
       room.getBoundingClientRect();
 
-    const minX = roomRect.left;
-    const maxX = roomRect.right - 46;
-    const minY = roomRect.top;
-    const maxY = roomRect.bottom - 46;
 
-    if (x <= minX || x >= maxX) {
-      vx *= -0.72;
-      x = Math.max(
-        minX,
-        Math.min(maxX, x)
+    let x =
+      event.clientX -
+      roomRect.left -
+      catOffsetX +
+      petZone.offsetWidth / 2;
+
+
+    let y =
+      event.clientY -
+      roomRect.top -
+      catOffsetY;
+
+
+    x = Math.max(
+      50,
+      Math.min(
+        roomRect.width - 50,
+        x
+      )
+    );
+
+
+    y = Math.max(
+      5,
+      Math.min(
+        roomRect.height - 130,
+        y
+      )
+    );
+
+
+    petZone.style.transition =
+      "none";
+
+
+    petZone.style.left =
+      x + "px";
+
+
+    petZone.style.top =
+      y + "px";
+
+
+    petZone.style.bottom =
+      "auto";
+  }
+);
+
+
+function finishCatDrag(
+  event
+) {
+
+  if (!catDragging) return;
+
+
+  catDragging = false;
+
+
+  try {
+
+    cat.releasePointerCapture(
+      event.pointerId
+    );
+
+  } catch (error) {}
+
+
+  cat.classList.remove(
+    "carried"
+  );
+
+
+  petZone.classList.remove(
+    "is-carried"
+  );
+
+
+  petZone.style.transition =
+    "left .65s linear";
+
+
+  cat.classList.add(
+    "drop-bounce"
+  );
+
+
+  setTimeout(() => {
+
+    cat.classList.remove(
+      "drop-bounce"
+    );
+
+  }, 380);
+
+
+  /*
+    If user only tapped,
+    treat it as petting.
+  */
+
+  if (!dragMoved) {
+
+    data.happiness =
+      clamp(
+        data.happiness + 5
       );
-    }
 
-    if (y <= minY || y >= maxY) {
-      vy *= -0.72;
-      y = Math.max(
-        minY,
-        Math.min(maxY, y)
+
+    cat.classList.add(
+      "happy"
+    );
+
+
+    showEffect("♥");
+
+    say("prrrr");
+
+
+    gainXP(3);
+
+
+    setTimeout(() => {
+
+      cat.classList.remove(
+        "happy"
       );
-    }
 
-    ballBody.style.left = x + "px";
-    ballBody.style.top = y + "px";
+    }, 1400);
+
+
+    updateUI();
+  }
+}
+
+
+cat.addEventListener(
+  "pointerup",
+  finishCatDrag
+);
+
+
+cat.addEventListener(
+  "pointercancel",
+  finishCatDrag
+);
+
+
+/* =========================
+   FOOD
+========================= */
+
+document
+  .getElementById(
+    "foodBowl"
+  )
+  .addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation();
+
+
+      if (
+        busy ||
+        catDragging
+      ) return;
+
+
+      busy = true;
+
+
+      bowlFood.style.opacity =
+        "1";
+
+
+      walkToPercent(
+        30,
+        false,
+        () => {
+
+          clearCatStates();
+
+
+          cat.classList.add(
+            "eating"
+          );
+
+
+          say(
+            "nom nom nom",
+            2200
+          );
+
+
+          let bites = 0;
+
+
+          const biteTimer =
+            setInterval(() => {
+
+              bites++;
+
+              bowlFood.style.transform =
+                bites % 2
+                  ? "scale(.8)"
+                  : "scale(1)";
+
+
+              showEffect("♪");
+
+
+              if (
+                bites >= 4
+              ) {
+
+                clearInterval(
+                  biteTimer
+                );
+
+
+                bowlFood.style.opacity =
+                  ".25";
+
+
+                bowlFood.style.transform =
+                  "";
+
+
+                data.hunger =
+                  clamp(
+                    data.hunger + 30
+                  );
+
+
+                data.happiness =
+                  clamp(
+                    data.happiness + 4
+                  );
+
+
+                gainXP(10);
+
+
+                clearCatStates();
+
+
+                updateUI();
+
+
+                setTimeout(() => {
+
+                  bowlFood.style.opacity =
+                    "1";
+
+
+                  walkToPercent(
+                    50,
+                    false,
+                    () => {
+
+                      busy = false;
+                    }
+                  );
+
+                }, 500);
+              }
+
+            }, 420);
+
+        }
+      );
+
+    }
+  );
+
+
+/* =========================
+   BED / REAL SLEEP POSE
+========================= */
+
+document
+  .getElementById(
+    "bed"
+  )
+  .addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation();
+
+
+      if (busy) return;
+
+
+      busy = true;
+
+
+      walkToPercent(
+        13,
+        false,
+        () => {
+
+          clearCatStates();
+
+
+          cat.classList.add(
+            "sleeping"
+          );
+
+
+          petZone.style.bottom =
+            "48px";
+
+
+          say(
+            "zzz...",
+            4200
+          );
+
+
+          showEffect("Z");
+
+
+          setTimeout(() => {
+
+            showEffect("z");
+
+          }, 1000);
+
+
+          setTimeout(() => {
+
+            showEffect("Z");
+
+          }, 2000);
+
+
+          setTimeout(() => {
+
+            data.energy =
+              clamp(
+                data.energy + 38
+              );
+
+
+            data.hunger =
+              clamp(
+                data.hunger - 7
+              );
+
+
+            gainXP(8);
+
+
+            clearCatStates();
+
+
+            petZone.style.bottom =
+              "79px";
+
+
+            say("good morning!");
+
+
+            updateUI();
+
+
+            walkToPercent(
+              50,
+              false,
+              () => {
+
+                busy = false;
+              }
+            );
+
+          }, 4300);
+
+        }
+      );
+
+    }
+  );
+
+
+/* =========================
+   BATH
+========================= */
+
+bath.addEventListener(
+  "click",
+  event => {
+
+    event.stopPropagation();
+
+
+    if (busy) return;
+
+
+    busy = true;
+
+
+    walkToPercent(
+      86,
+      false,
+      () => {
+
+        clearCatStates();
+
+
+        cat.classList.add(
+          "bathing"
+        );
+
+
+        bath.classList.add(
+          "active"
+        );
+
+
+        petZone.style.bottom =
+          "45px";
+
+
+        say(
+          "splash!",
+          3000
+        );
+
+
+        showEffect("✦");
+
+
+        setTimeout(() => {
+
+          showEffect("○");
+
+        }, 600);
+
+
+        setTimeout(() => {
+
+          showEffect("○");
+
+        }, 1300);
+
+
+        setTimeout(() => {
+
+          data.cleanliness =
+            clamp(
+              data.cleanliness + 40
+            );
+
+
+          data.happiness =
+            clamp(
+              data.happiness + 4
+            );
+
+
+          gainXP(8);
+
+
+          clearCatStates();
+
+
+          bath.classList.remove(
+            "active"
+          );
+
+
+          petZone.style.bottom =
+            "79px";
+
+
+          say("so clean!");
+
+
+          updateUI();
+
+
+          walkToPercent(
+            50,
+            false,
+            () => {
+
+              busy = false;
+            }
+          );
+
+        }, 3200);
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================
+   BALL DRAG + THROW
+========================= */
+
+ball.addEventListener(
+  "pointerdown",
+  event => {
 
     if (
-      Math.abs(vx) > 0.3 ||
-      Math.abs(vy) > 0.3
-    ) {
-      requestAnimationFrame(animate);
-    } else {
-      catChaseBall(x, y);
+      busy ||
+      ballAnimationId
+    ) return;
 
-      setTimeout(resetBall, 1100);
+
+    ballDragging = true;
+
+
+    ball.setPointerCapture(
+      event.pointerId
+    );
+
+
+    ballLastX =
+      event.clientX;
+
+    ballLastY =
+      event.clientY;
+
+
+    ballVX = 0;
+    ballVY = 0;
+
+
+    const rect =
+      ball.getBoundingClientRect();
+
+
+    ball.style.position =
+      "fixed";
+
+
+    ball.style.left =
+      rect.left + "px";
+
+    ball.style.top =
+      rect.top + "px";
+
+
+    ball.style.zIndex =
+      "1000";
+
+
+    ball.style.margin =
+      "0";
+  }
+);
+
+
+ball.addEventListener(
+  "pointermove",
+  event => {
+
+    if (!ballDragging) return;
+
+
+    ballVX =
+      event.clientX -
+      ballLastX;
+
+
+    ballVY =
+      event.clientY -
+      ballLastY;
+
+
+    ballLastX =
+      event.clientX;
+
+
+    ballLastY =
+      event.clientY;
+
+
+    ball.style.left =
+      event.clientX -
+      24 +
+      "px";
+
+
+    ball.style.top =
+      event.clientY -
+      24 +
+      "px";
+  }
+);
+
+
+function finishBallDrag(
+  event
+) {
+
+  if (!ballDragging) return;
+
+
+  ballDragging = false;
+
+
+  try {
+
+    ball.releasePointerCapture(
+      event.pointerId
+    );
+
+  } catch (error) {}
+
+
+  throwBall();
+}
+
+
+ball.addEventListener(
+  "pointerup",
+  finishBallDrag
+);
+
+
+ball.addEventListener(
+  "pointercancel",
+  finishBallDrag
+);
+
+
+/* =========================
+   BALL PHYSICS
+========================= */
+
+function throwBall() {
+
+  busy = true;
+
+
+  let x =
+    parseFloat(
+      ball.style.left
+    );
+
+
+  let y =
+    parseFloat(
+      ball.style.top
+    );
+
+
+  let vx =
+    ballVX * 1.65;
+
+
+  let vy =
+    ballVY * 1.65;
+
+
+  /*
+    If user barely moved:
+    give it a small toss.
+  */
+
+  if (
+    Math.abs(vx) < 2 &&
+    Math.abs(vy) < 2
+  ) {
+
+    vx = 4;
+
+    vy = -5;
+  }
+
+
+  const gravity = .45;
+
+  const friction = .985;
+
+
+  function physics() {
+
+    const roomRect =
+      room.getBoundingClientRect();
+
+
+    const minX =
+      roomRect.left + 5;
+
+
+    const maxX =
+      roomRect.right - 53;
+
+
+    const minY =
+      roomRect.top + 5;
+
+
+    const maxY =
+      roomRect.bottom - 54;
+
+
+    x += vx;
+
+    y += vy;
+
+
+    vy += gravity;
+
+
+    vx *= friction;
+
+
+    if (
+      x <= minX ||
+      x >= maxX
+    ) {
+
+      vx *= -.72;
+
+
+      x = Math.max(
+        minX,
+        Math.min(
+          maxX,
+          x
+        )
+      );
+    }
+
+
+    if (y >= maxY) {
+
+      y = maxY;
+
+      vy *= -.57;
+
+      vx *= .91;
+    }
+
+
+    if (y <= minY) {
+
+      y = minY;
+
+      vy *= -.65;
+    }
+
+
+    ball.style.left =
+      x + "px";
+
+
+    ball.style.top =
+      y + "px";
+
+
+    ball.style.transform =
+      `rotate(${x * 2}deg)`;
+
+
+    const stopped =
+      Math.abs(vx) < .28 &&
+      Math.abs(vy) < .6 &&
+      y >= maxY - 2;
+
+
+    if (!stopped) {
+
+      ballAnimationId =
+        requestAnimationFrame(
+          physics
+        );
+
+    } else {
+
+      ballAnimationId = null;
+
+
+      chaseBall(
+        x + 24
+      );
     }
   }
 
-  animate();
+
+  physics();
 }
 
-function catChaseBall(ballX, ballY) {
+
+/* =========================
+   CAT CHASE BALL
+========================= */
+
+function chaseBall(
+  ballScreenX
+) {
+
   const roomRect =
     room.getBoundingClientRect();
 
+
   const localX =
-    ballX -
-    roomRect.left +
-    23;
+    ballScreenX -
+    roomRect.left;
 
-  const percentage =
-    (localX / roomRect.width) * 100;
 
-  petZone.style.left =
+  const percent =
     Math.max(
-      10,
-      Math.min(90, percentage)
-    ) + "%";
+      11,
+      Math.min(
+        89,
+        localX /
+        roomRect.width *
+        100
+      )
+    );
 
-  petZone.style.top = "auto";
-  petZone.style.bottom = "82px";
 
-  data.happiness =
-    clamp(data.happiness + 12);
+  say("BALL!!");
 
-  data.energy =
-    clamp(data.energy - 7);
 
-  gainXP(10);
+  walkToPercent(
+    percent,
+    true,
+    () => {
 
-  say("ball!!");
-  showEffect("★");
+      clearCatStates();
 
-  updateUI();
+
+      cat.classList.add(
+        "happy"
+      );
+
+
+      showEffect("★");
+
+
+      data.happiness =
+        clamp(
+          data.happiness + 15
+        );
+
+
+      data.energy =
+        clamp(
+          data.energy - 8
+        );
+
+
+      data.hunger =
+        clamp(
+          data.hunger - 3
+        );
+
+
+      gainXP(12);
+
+
+      updateUI();
+
+
+      setTimeout(() => {
+
+        cat.classList.remove(
+          "happy"
+        );
+
+
+        resetBall();
+
+
+        busy = false;
+
+      }, 900);
+
+    }
+  );
 }
+
+
+/* =========================
+   RESET BALL
+========================= */
 
 function resetBall() {
-  ballBody.style.position = "";
-  ballBody.style.zIndex = "";
-  ballBody.style.left = "";
-  ballBody.style.top = "";
+
+  if (ballAnimationId) {
+
+    cancelAnimationFrame(
+      ballAnimationId
+    );
+
+    ballAnimationId = null;
+  }
+
+
+  ball.style.position =
+    "";
+
+  ball.style.left =
+    "";
+
+  ball.style.top =
+    "";
+
+  ball.style.zIndex =
+    "";
+
+  ball.style.margin =
+    "";
+
+  ball.style.transform =
+    "";
 }
 
-/* XP */
 
-function gainXP(amount) {
+/* =========================
+   XP
+========================= */
+
+function gainXP(
+  amount
+) {
+
   data.xp += amount;
 
-  if (data.xp >= 100) {
+
+  while (
+    data.xp >= 100
+  ) {
+
     data.xp -= 100;
+
     data.level++;
+
     data.coins += 50;
 
-    say("LEVEL UP!");
-    showEffect("★");
+
+    setTimeout(() => {
+
+      say("LEVEL UP!");
+
+      showEffect("★");
+
+    }, 300);
   }
 }
 
-/* RENAME */
+
+/* =========================
+   RENAME
+========================= */
 
 function renamePet() {
-  const newName =
+
+  const name =
     prompt(
       "Pet name:",
       data.name
     );
 
-  if (!newName) return;
 
-  data.name =
-    newName
+  if (!name) return;
+
+
+  const cleanName =
+    name
       .trim()
       .substring(0, 12);
 
+
+  if (!cleanName) return;
+
+
+  data.name =
+    cleanName;
+
+
   updateUI();
+
+
+  say("that's me!");
 }
 
-/* RESET */
+
+/* =========================
+   RESET
+========================= */
 
 function resetPet() {
-  const confirmed =
+
+  const confirmation =
     confirm(
-      "Reset your pet progress?"
+      "Reset all pet progress?"
     );
 
-  if (!confirmed) return;
 
-  data = { ...defaultData };
+  if (!confirmation) return;
 
-  petZone.style.left = "50%";
-  petZone.style.top = "";
-  petZone.style.bottom = "82px";
+
+  data = {
+    ...defaultData
+  };
+
+
+  clearCatStates();
+
+
+  petZone.classList.remove(
+    "is-carried"
+  );
+
+
+  petZone.style.left =
+    "50%";
+
+
+  petZone.style.top =
+    "";
+
+
+  petZone.style.bottom =
+    "79px";
+
+
+  resetBall();
+
 
   updateUI();
+
+
   say("new game!");
 }
 
-/* RANDOM PET TALK */
+
+/* =========================
+   RANDOM BEHAVIOUR
+========================= */
 
 const randomMessages = [
-  "meow",
+
+  "meow~",
+
   "mrrp",
+
+  "pet me!",
+
   "play?",
+
   "food?",
-  "pet me",
-  "..."
+
+  "...",
+
+  "hello human"
 ];
 
+
 setInterval(() => {
+
   if (
-    !busy &&
-    !catDragging &&
-    Math.random() < 0.4
+    busy ||
+    catDragging ||
+    ballDragging
   ) {
-    const randomText =
+
+    return;
+  }
+
+
+  /*
+    Mood-specific requests
+  */
+
+  if (data.hunger < 25) {
+
+    say("hungry...");
+
+    return;
+  }
+
+
+  if (data.energy < 20) {
+
+    say("sleepy...");
+
+    return;
+  }
+
+
+  if (data.cleanliness < 20) {
+
+    say("bath...?");
+
+    return;
+  }
+
+
+  if (
+    Math.random() < .38
+  ) {
+
+    const text =
       randomMessages[
         Math.floor(
           Math.random() *
@@ -531,28 +1802,50 @@ setInterval(() => {
         )
       ];
 
-    say(randomText);
-  }
-}, 9000);
 
-/* STAT DECAY */
+    say(text);
+  }
+
+}, 8500);
+
+
+/* =========================
+   NATURAL DECAY
+========================= */
 
 setInterval(() => {
+
   data.hunger =
-    clamp(data.hunger - 1.5);
+    clamp(
+      data.hunger - 1.5
+    );
+
 
   data.happiness =
-    clamp(data.happiness - 0.6);
+    clamp(
+      data.happiness - .55
+    );
+
 
   data.energy =
-    clamp(data.energy - 0.8);
+    clamp(
+      data.energy - .75
+    );
+
 
   data.cleanliness =
-    clamp(data.cleanliness - 0.5);
+    clamp(
+      data.cleanliness - .45
+    );
+
 
   updateUI();
+
 }, 60000);
 
-/* START */
+
+/* =========================
+   START
+========================= */
 
 updateUI();
