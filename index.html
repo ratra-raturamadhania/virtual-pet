@@ -17,6 +17,8 @@
 
 <main class="game-shell">
 
+  <!-- HEADER -->
+
   <header class="topbar">
 
     <div>
@@ -42,71 +44,229 @@
 
   </header>
 
+
+  <!-- GAME FRAME -->
+
   <section class="screen">
 
     <div class="room" id="room">
 
+      <!-- WALL BASE -->
+
+      <div class="wall-stripe"></div>
+
+
       <!-- WINDOW -->
 
       <div class="window-pixel">
+
         <div class="cloud cloud-one"></div>
         <div class="cloud cloud-two"></div>
+
+        <div class="window-plant">
+          <div class="tiny-leaf leaf-one"></div>
+          <div class="tiny-leaf leaf-two"></div>
+          <div class="tiny-pot"></div>
+        </div>
+
+      </div>
+
+
+      <!-- DYNAMIC PHOTO FRAME -->
+
+      <div class="photo-frame">
+
+        <div class="photo-inner">
+
+          <!-- OWNER SILHOUETTE -->
+
+          <div class="owner-shadow">
+
+            <div class="owner-hair"></div>
+            <div class="owner-head"></div>
+            <div class="owner-body"></div>
+
+          </div>
+
+
+          <!-- MINI CAT IN PHOTO -->
+
+          <div
+            class="portrait-cat orange"
+            id="portraitCat"
+          >
+
+            <div class="portrait-ear portrait-ear-left"></div>
+            <div class="portrait-ear portrait-ear-right"></div>
+
+            <div class="portrait-head">
+
+              <div class="portrait-patch portrait-patch-head"></div>
+
+              <div class="portrait-eye portrait-eye-left"></div>
+              <div class="portrait-eye portrait-eye-right"></div>
+
+              <div class="portrait-nose"></div>
+
+            </div>
+
+            <div class="portrait-body">
+              <div class="portrait-patch portrait-patch-body"></div>
+            </div>
+
+          </div>
+
+          <div class="photo-heart">
+            ♥
+          </div>
+
+        </div>
+
       </div>
 
 
       <!-- SUNFLOWERS -->
 
-      <div class="sunflowers">
+      <div class="sunflower-corner">
 
-        <div class="sunflower flower-one">
-          <div class="petal petal-1"></div>
-          <div class="petal petal-2"></div>
-          <div class="petal petal-3"></div>
-          <div class="petal petal-4"></div>
-          <div class="petal petal-5"></div>
-          <div class="petal petal-6"></div>
+        <div class="sunflower sf-one">
+          <div class="sf-petal sf-p1"></div>
+          <div class="sf-petal sf-p2"></div>
+          <div class="sf-petal sf-p3"></div>
+          <div class="sf-petal sf-p4"></div>
+          <div class="sf-petal sf-p5"></div>
+          <div class="sf-petal sf-p6"></div>
 
-          <div class="flower-center"></div>
-          <div class="flower-stem"></div>
+          <div class="sf-center"></div>
+          <div class="sf-stem"></div>
         </div>
 
 
-        <div class="sunflower flower-two">
-          <div class="petal petal-1"></div>
-          <div class="petal petal-2"></div>
-          <div class="petal petal-3"></div>
-          <div class="petal petal-4"></div>
-          <div class="petal petal-5"></div>
-          <div class="petal petal-6"></div>
+        <div class="sunflower sf-two">
+          <div class="sf-petal sf-p1"></div>
+          <div class="sf-petal sf-p2"></div>
+          <div class="sf-petal sf-p3"></div>
+          <div class="sf-petal sf-p4"></div>
+          <div class="sf-petal sf-p5"></div>
+          <div class="sf-petal sf-p6"></div>
 
-          <div class="flower-center"></div>
-          <div class="flower-stem"></div>
+          <div class="sf-center"></div>
+          <div class="sf-stem"></div>
         </div>
 
-        <div class="flower-pot"></div>
+        <div class="sunflower-pot"></div>
 
       </div>
 
 
-      <!-- POSTER -->
+      <!-- RUG -->
 
-      <div class="poster">
-        ★
+      <div class="rug">
+        <div class="rug-pattern"></div>
+      </div>
+
+
+      <!-- BED -->
+
+      <div
+        class="bed furniture"
+        id="bed"
+        title="Sleep"
+      >
+
+        <div class="bed-headboard"></div>
+
+        <div class="bed-mattress">
+
+          <div class="bed-pillow"></div>
+          <div class="bed-blanket"></div>
+
+        </div>
+
+        <div class="bed-leg bed-leg-left"></div>
+        <div class="bed-leg bed-leg-right"></div>
+
+      </div>
+
+
+      <!-- FOOD CORNER -->
+
+      <div
+        class="food-corner furniture"
+        id="foodBowl"
+        title="Eat"
+      >
+
+        <div class="food-mat"></div>
+
+        <div class="bowl-food" id="bowlFood"></div>
+
+        <div class="food-bowl-shape"></div>
+
+      </div>
+
+
+      <!-- BATH -->
+
+      <div
+        class="bath furniture"
+        id="bath"
+        title="Bath"
+      >
+
+        <div class="bath-faucet"></div>
+
+        <div class="bath-bubbles">
+
+          <i></i>
+          <i></i>
+          <i></i>
+          <i></i>
+
+        </div>
+
+        <div class="bath-rim"></div>
+
+        <div class="bath-body"></div>
+
+      </div>
+
+
+      <!-- BALL -->
+
+      <div class="ball-start" id="ballStart">
+
+        <div
+          class="ball"
+          id="ball"
+          title="Drag and throw!"
+        ></div>
+
       </div>
 
 
       <!-- SPEECH -->
 
-      <div id="speech" class="speech hidden">
+      <div
+        id="speech"
+        class="speech hidden"
+      >
         meow!
       </div>
 
 
       <!-- PET -->
 
-      <div class="pet-zone" id="petZone">
+      <div
+        class="pet-zone"
+        id="petZone"
+      >
 
-        <div class="pet-shadow" id="petShadow"></div>
+        <div
+          class="pet-shadow"
+          id="petShadow"
+        ></div>
+
 
         <div
           class="pixel-cat orange"
@@ -117,6 +277,7 @@
 
           <div class="ear ear-left"></div>
           <div class="ear ear-right"></div>
+
 
           <div class="head">
 
@@ -130,9 +291,11 @@
 
           </div>
 
+
           <div class="body">
             <div class="patch patch-body"></div>
           </div>
+
 
           <div class="leg leg-left"></div>
           <div class="leg leg-right"></div>
@@ -148,78 +311,6 @@
       </div>
 
 
-      <!-- BED -->
-
-      <div
-        class="object bed"
-        id="bed"
-      >
-
-        <div class="bed-pillow"></div>
-        <div class="bed-base"></div>
-
-        <span>BED</span>
-
-      </div>
-
-
-      <!-- FOOD -->
-
-      <div
-        class="object food-bowl"
-        id="foodBowl"
-      >
-
-        <div
-          class="bowl-food"
-          id="bowlFood"
-        ></div>
-
-        <div class="bowl"></div>
-
-        <span>FOOD</span>
-
-      </div>
-
-
-      <!-- BALL -->
-
-      <div
-        class="object ball-home"
-        id="ballHome"
-      >
-
-        <div
-          class="ball"
-          id="ball"
-        ></div>
-
-        <span>THROW</span>
-
-      </div>
-
-
-      <!-- BATH -->
-
-      <div
-        class="object bath"
-        id="bath"
-      >
-
-        <div class="bath-bubbles">
-          <i></i>
-          <i></i>
-          <i></i>
-        </div>
-
-        <div class="bath-rim"></div>
-        <div class="bath-body"></div>
-
-        <span>BATH</span>
-
-      </div>
-
-
       <div class="floor-line"></div>
 
     </div>
@@ -230,6 +321,7 @@
     <div class="stats">
 
       <div class="stat">
+
         <span>HUNGER</span>
 
         <div class="meter">
@@ -237,10 +329,12 @@
         </div>
 
         <b id="hungerText">80</b>
+
       </div>
 
 
       <div class="stat">
+
         <span>HAPPY</span>
 
         <div class="meter">
@@ -248,10 +342,12 @@
         </div>
 
         <b id="happyText">80</b>
+
       </div>
 
 
       <div class="stat">
+
         <span>ENERGY</span>
 
         <div class="meter">
@@ -259,10 +355,12 @@
         </div>
 
         <b id="energyText">80</b>
+
       </div>
 
 
       <div class="stat">
+
         <span>CLEAN</span>
 
         <div class="meter">
@@ -270,6 +368,7 @@
         </div>
 
         <b id="cleanText">80</b>
+
       </div>
 
     </div>
@@ -277,7 +376,7 @@
   </section>
 
 
-  <!-- CAT STYLE -->
+  <!-- CAT CUSTOMIZER -->
 
   <section class="customizer">
 
@@ -316,10 +415,11 @@
 
 
   <p class="hint">
-    drag Mochi • pet Mochi • throw the ball • tap food, bed or bath
+    pet • pick up • throw the ball • tap furniture
   </p>
 
 </main>
+
 
 <script src="script.js"></script>
 
