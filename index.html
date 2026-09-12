@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=no"
-  />
+  >
   <title>Pixel Pet</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -15,6 +15,7 @@
 <main class="game-shell">
 
   <header class="topbar">
+
     <div>
       <span class="mini-label">PIXEL PET</span>
       <h1 id="petName">Sucipto</h1>
@@ -25,6 +26,7 @@
       <div>XP <span id="xp">0</span>/100</div>
       <div>🪙 <span id="coins">100</span></div>
     </div>
+
   </header>
 
   <section class="screen">
@@ -37,6 +39,7 @@
       </div>
 
       <div class="sunflower-corner">
+
         <div class="sunflower sf-one">
           <div class="sf-petal sf-p1"></div>
           <div class="sf-petal sf-p2"></div>
@@ -44,6 +47,7 @@
           <div class="sf-petal sf-p4"></div>
           <div class="sf-petal sf-p5"></div>
           <div class="sf-petal sf-p6"></div>
+
           <div class="sf-center"></div>
           <div class="sf-stem"></div>
         </div>
@@ -55,14 +59,17 @@
           <div class="sf-petal sf-p4"></div>
           <div class="sf-petal sf-p5"></div>
           <div class="sf-petal sf-p6"></div>
+
           <div class="sf-center"></div>
           <div class="sf-stem"></div>
         </div>
 
         <div class="sunflower-pot"></div>
+
       </div>
 
       <div class="photo-frame">
+
         <div class="photo-inner">
 
           <div class="owner-shadow">
@@ -72,6 +79,7 @@
           </div>
 
           <div class="portrait-cat orange" id="portraitCat">
+
             <div class="portrait-ear portrait-ear-left"></div>
             <div class="portrait-ear portrait-ear-right"></div>
 
@@ -85,16 +93,19 @@
             <div class="portrait-body">
               <div class="portrait-patch portrait-patch-body"></div>
             </div>
+
           </div>
 
           <div class="photo-heart">♥</div>
+
         </div>
+
       </div>
 
       <div class="rug"></div>
 
-      <!-- BED -->
       <div class="bed furniture" id="bed">
+
         <div class="bed-headboard"></div>
 
         <div class="bed-mattress">
@@ -104,22 +115,25 @@
 
         <div class="bed-leg bed-leg-left"></div>
         <div class="bed-leg bed-leg-right"></div>
+
       </div>
 
-      <!-- FOOD -->
       <div class="food-corner furniture" id="foodBowl">
+
         <div class="food-mat"></div>
+
         <div class="bowl-food" id="bowlFood"></div>
+
         <div class="food-bowl-shape"></div>
+
       </div>
 
-      <!-- BALL -->
       <div class="ball-start">
         <div class="ball" id="ball"></div>
       </div>
 
-      <!-- BATH -->
       <div class="bath furniture" id="bath">
+
         <div class="bath-faucet"></div>
 
         <div class="bath-bubbles">
@@ -131,12 +145,13 @@
 
         <div class="bath-rim"></div>
         <div class="bath-body"></div>
+
       </div>
 
-      <!-- SPEECH -->
-      <div id="speech" class="speech hidden">meow!</div>
+      <div id="speech" class="speech hidden">
+        meow!
+      </div>
 
-      <!-- PET -->
       <div class="pet-zone" id="petZone">
 
         <div class="pet-shadow"></div>
@@ -149,6 +164,7 @@
           <div class="ear ear-right"></div>
 
           <div class="head">
+
             <div class="patch patch-head"></div>
 
             <div class="eye eye-left"></div>
@@ -156,21 +172,20 @@
 
             <div class="nose"></div>
             <div class="mouth"></div>
+
           </div>
 
           <div class="body">
             <div class="patch patch-body"></div>
           </div>
 
-          <!-- 4 LEGS -->
-          <div class="leg front-leg front-left"></div>
-          <div class="leg front-leg front-right"></div>
-          <div class="leg back-leg back-left"></div>
-          <div class="leg back-leg back-right"></div>
+          <div class="leg leg-left"></div>
+          <div class="leg leg-right"></div>
 
         </div>
 
         <div class="floating-effect" id="floatingEffect"></div>
+
       </div>
 
       <div class="floor-line"></div>
@@ -208,17 +223,21 @@
   </section>
 
   <section class="customizer">
+
     <span>CAT STYLE</span>
 
     <button data-pattern="orange">ORANGE</button>
     <button data-pattern="tuxedo">TUXEDO</button>
     <button data-pattern="calico">CALICO</button>
     <button data-pattern="gray">GRAY</button>
+
   </section>
 
   <div class="controls">
+
     <button onclick="renamePet()">RENAME</button>
     <button onclick="resetPet()">RESET</button>
+
   </div>
 
   <p class="hint">
