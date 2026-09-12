@@ -2591,3 +2591,245 @@ button.active-pattern {
   }
 
 }
+/* ===================================
+   NEW 2D MOVEMENT ENGINE
+=================================== */
+
+.pet-zone {
+  --depth-scale: 1;
+
+  transform:
+    translateX(-50%)
+    scale(var(--depth-scale));
+
+  transform-origin:
+    center bottom;
+
+  will-change:
+    left,
+    top,
+    transform;
+}
+
+
+/* jangan scale arah kiri pakai properti scale lagi */
+.pixel-cat.face-left {
+  transform:
+    scaleX(-1);
+}
+
+
+/* tuxedo eyes */
+.pixel-cat.tuxedo .eye {
+  background: #66baff !important;
+
+  box-shadow:
+    inset 0 0 0 2px #2c6c9c;
+}
+
+
+.portrait-cat.tuxedo
+.portrait-eye {
+
+  background:
+    #66baff !important;
+}
+
+
+/* ===================================
+   REAL SLEEP POSE
+=================================== */
+
+.pixel-cat.sleeping {
+
+  animation:
+    sleepingBreath
+    1.4s
+    ease-in-out
+    infinite
+    alternate;
+
+  transform-origin:
+    center center;
+}
+
+
+/*
+  Kepala tidak sekadar ikut badan miring.
+*/
+
+.pixel-cat.sleeping .head {
+
+  transform:
+    translate(-19px, 35px)
+    rotate(-8deg);
+}
+
+
+.pixel-cat.sleeping .body {
+
+  width: 82px;
+  height: 45px;
+
+  left: 17px;
+  bottom: 13px;
+
+  border-radius:
+    35% 45% 30% 35%;
+
+  transform:
+    rotate(3deg);
+}
+
+
+.pixel-cat.sleeping .ear-left {
+
+  transform:
+    rotate(32deg);
+}
+
+
+.pixel-cat.sleeping .ear-right {
+
+  transform:
+    rotate(58deg);
+}
+
+
+.pixel-cat.sleeping .eye {
+
+  height: 3px !important;
+  width: 12px;
+
+  top: 27px !important;
+}
+
+
+.pixel-cat.sleeping .leg {
+
+  height: 13px;
+
+  bottom: 9px;
+}
+
+
+.pixel-cat.sleeping
+.leg-left {
+
+  left: 55px;
+
+  transform:
+    rotate(90deg);
+}
+
+
+.pixel-cat.sleeping
+.leg-right {
+
+  right: 1px;
+
+  transform:
+    rotate(90deg);
+}
+
+
+.pixel-cat.sleeping .tail {
+
+  width: 55px;
+
+  right: -24px;
+  bottom: 16px;
+
+  animation: none;
+
+  transform:
+    rotate(5deg);
+}
+
+
+@keyframes sleepingBreath {
+
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: 0 2px;
+  }
+}
+
+
+/* ===================================
+   WALK TOWARD / AWAY EFFECT
+=================================== */
+
+.pixel-cat.walking {
+
+  animation:
+    smootherWalk
+    .28s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+
+@keyframes smootherWalk {
+
+  from {
+
+    translate: 0 0;
+  }
+
+  to {
+
+    translate: 0 -4px;
+  }
+}
+
+
+/* carried stays above everything */
+
+.pet-zone.is-carried {
+
+  z-index: 200 !important;
+}
+
+
+/* nicer drop */
+
+.pixel-cat.drop-bounce {
+
+  animation:
+    newDropBounce
+    .35s
+    cubic-bezier(
+      .2,
+      .9,
+      .3,
+      1.3
+    );
+}
+
+
+@keyframes newDropBounce {
+
+  0% {
+
+    transform:
+      scaleY(1);
+  }
+
+  55% {
+
+    transform:
+      scaleY(.82)
+      scaleX(1.08);
+  }
+
+  100% {
+
+    transform:
+      scale(1);
+  }
+}
