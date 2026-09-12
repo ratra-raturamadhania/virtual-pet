@@ -869,339 +869,313 @@ function petCat() {
    FOOD
 ========================= */
 
-foodBowl.addEventListener(
-  "click",
-  event => {
-    event.stopPropagation();
+foodBowl.addEventListener("click", event => {
+  event.stopPropagation();
 
-    if (busy) return;
+  if (busy) return;
 
-    busy = true;
+  busy = true;
 
-    const roomBox =
-      getRoomRect();
+  const roomBox = getRoomRect();
+  const bowlBox = foodBowl.getBoundingClientRect();
 
-    const objectBox =
-      foodBowl.getBoundingClientRect();
+  const targetX =
+    bowlBox.left -
+    roomBox.left +
+    bowlBox.width / 2;
 
-    const x =
-      objectBox.left -
-      roomBox.left +
-      objectBox.width / 2;
+  const targetY =
+    floorNearY() - 5;
 
-    movePetTo(
-      x,
-      floorNearY() - 5,
-      {
-        callback: () => {
-          clearCatStates();
+  movePetTo(
+    targetX,
+    targetY,
+    {
+      callback: () => {
+        clearCatStates();
 
-          cat.classList.add(
-            "eating"
-          );
+        petZone.classList.add("at-food");
 
-          say(
-            "nom nom...",
-            2200
-          );
+        cat.classList.add("eating");
 
-          let bites = 0;
+        say("nom nom...", 2200);
 
-          const eating =
-            setInterval(() => {
-              bites++;
+        let bites = 0;
 
-              bowlFood.style.transform =
-                bites % 2
-                  ? "scale(.7)"
-                  : "scale(1)";
+        const eatingTimer =
+          setInterval(() => {
+            bites++;
 
-              if (bites >= 4) {
-                clearInterval(
-                  eating
-                );
+            bowlFood.style.transform =
+              bites % 2
+                ? "scale(.65)"
+                : "scale(1)";
 
-                bowlFood.style.opacity =
-                  ".25";
+            if (bites === 2) {
+              bowlFood.style.opacity = ".6";
+            }
 
-                bowlFood.style.transform =
-                  "";
+            if (bites === 3) {
+              bowlFood.style.opacity = ".35";
+            }
 
-                data.hunger =
-                  clamp(
-                    data.hunger + 30,
-                    0,
-                    100
-                  );
+            if (bites >= 4) {
+              clearInterval(eatingTimer);
 
-                data.happiness =
-                  clamp(
-                    data.happiness + 4,
-                    0,
-                    100
-                  );
+              bowlFood.style.opacity = ".15";
 
-                gainXP(10);
+              bowlFood.style.transform = "";
 
-                clearCatStates();
-
-                updateUI();
-
-                setTimeout(() => {
-                  bowlFood.style.opacity =
-                    "1";
-
-                  busy = false;
-                }, 400);
-              }
-            }, 400);
-        }
-      }
-    );
-  }
-);
-
-/* =========================
-   BED
-========================= */
-
-bed.addEventListener(
-  "click",
-  event => {
-    event.stopPropagation();
-
-    if (busy) return;
-
-    busy = true;
-
-    const roomBox =
-      getRoomRect();
-
-    const bedBox =
-      bed.getBoundingClientRect();
-
-    /*
-      Pertama: jalan ke sisi kasur.
-    */
-
-    const approachX =
-      bedBox.right -
-      roomBox.left +
-      30;
-
-    movePetTo(
-      approachX,
-      floorNearY(),
-      {
-        callback: () => {
-          clearCatStates();
-
-          /*
-            Posisi TENGAH kasur.
-            Kucing tidur di atas mattress.
-          */
-
-          const sleepX =
-            bedBox.left -
-            roomBox.left +
-            bedBox.width * 0.55;
-
-          const sleepTop =
-            bedBox.top -
-            roomBox.top +
-            5;
-
-          petZone.style.transition =
-            "left .35s ease, top .35s ease, transform .35s ease";
-
-          petZone.style.left =
-            `${sleepX}px`;
-
-          petZone.style.top =
-            `${sleepTop}px`;
-
-          petZone.style.bottom =
-            "auto";
-
-          petZone.style.zIndex =
-            "22";
-
-          petZone.classList.add(
-            "on-bed"
-          );
-
-          cat.classList.add(
-            "sleeping"
-          );
-
-          say(
-            "zzz...",
-            4500
-          );
-
-          showEffect("Z");
-
-          setTimeout(() => {
-            showEffect("z");
-          }, 1200);
-
-          setTimeout(() => {
-            showEffect("Z");
-          }, 2500);
-
-          setTimeout(() => {
-            data.energy =
-              clamp(
-                data.energy + 38,
+              data.hunger = clamp(
+                data.hunger + 30,
                 0,
                 100
               );
 
-            data.hunger =
-              clamp(
-                data.hunger - 7,
-                0,
-                100
-              );
-
-            gainXP(8);
-
-            clearCatStates();
-
-            /*
-              Turun di samping kasur.
-            */
-
-            setPetPosition(
-              clamp(
-                bedBox.right -
-                  roomBox.left +
-                  45,
-                petWidth() / 2,
-                room.clientWidth -
-                  petWidth() / 2
-              ),
-              floorNearY()
-            );
-
-            say("morning!");
-
-            updateUI();
-
-            busy = false;
-
-          }, 4500);
-        }
-      }
-    );
-  }
-);
-
-/* =========================
-   BATH
-========================= */
-
-bath.addEventListener(
-  "click",
-  event => {
-    event.stopPropagation();
-
-    if (busy) return;
-
-    busy = true;
-
-    const roomBox =
-      getRoomRect();
-
-    const bathBox =
-      bath.getBoundingClientRect();
-
-    const approachX =
-      bathBox.left -
-      roomBox.left -
-      35;
-
-    movePetTo(
-      approachX,
-      floorNearY(),
-      {
-        callback: () => {
-          clearCatStates();
-
-          const bathX =
-            bathBox.left -
-            roomBox.left +
-            bathBox.width / 2;
-
-          const bathTop =
-            bathBox.top -
-            roomBox.top -
-            5;
-
-          petZone.style.transition =
-            "left .3s ease, top .3s ease";
-
-          petZone.style.left =
-            `${bathX}px`;
-
-          petZone.style.top =
-            `${bathTop}px`;
-
-          petZone.style.zIndex =
-            "25";
-
-          cat.classList.add(
-            "bathing"
-          );
-
-          bath.classList.add(
-            "active"
-          );
-
-          say("splash!", 3000);
-
-          setTimeout(() => {
-            data.cleanliness =
-              clamp(
-                data.cleanliness + 40,
-                0,
-                100
-              );
-
-            data.happiness =
-              clamp(
+              data.happiness = clamp(
                 data.happiness + 4,
                 0,
                 100
               );
 
-            gainXP(8);
+              gainXP(10);
 
-            bath.classList.remove(
-              "active"
-            );
+              cat.classList.remove("eating");
 
-            clearCatStates();
+              petZone.classList.remove("at-food");
 
-            setPetPosition(
-              bathBox.left -
-                roomBox.left -
-                45,
-              floorNearY()
-            );
+              updateUI();
 
-            say("fresh!");
+              setTimeout(() => {
+                bowlFood.style.opacity = "1";
 
-            updateUI();
-
-            busy = false;
-
-          }, 3000);
-        }
+                busy = false;
+              }, 500);
+            }
+          }, 420);
       }
-    );
-  }
-);
+    }
+  );
+});
+
+/* =========================
+   BED
+========================= */
+
+bed.addEventListener("click", event => {
+  event.stopPropagation();
+
+  if (busy) return;
+
+  busy = true;
+
+  const roomBox = getRoomRect();
+  const bedBox = bed.getBoundingClientRect();
+
+  const approachX =
+    bedBox.right -
+    roomBox.left +
+    35;
+
+  movePetTo(
+    approachX,
+    floorNearY(),
+    {
+      callback: () => {
+        clearCatStates();
+
+        const sleepX =
+          bedBox.left -
+          roomBox.left +
+          bedBox.width * 0.55;
+
+        /*
+          anchor kasur:
+          pakai posisi atas kasur + offset tetap.
+          Jangan berdasarkan tinggi sprite lagi.
+        */
+        const sleepTop =
+          bedBox.top -
+          roomBox.top -
+          18;
+
+        petZone.style.transition =
+          "left .35s ease, top .35s ease";
+
+        petZone.style.left =
+          `${sleepX}px`;
+
+        petZone.style.top =
+          `${sleepTop}px`;
+
+        petZone.style.bottom =
+          "auto";
+
+        petZone.classList.add("on-bed");
+
+        cat.classList.add("sleeping");
+
+        say("zzz...", 4500);
+
+        showEffect("Z");
+
+        setTimeout(() => {
+          showEffect("z");
+        }, 1200);
+
+        setTimeout(() => {
+          showEffect("Z");
+        }, 2500);
+
+        setTimeout(() => {
+          data.energy = clamp(
+            data.energy + 38,
+            0,
+            100
+          );
+
+          data.hunger = clamp(
+            data.hunger - 7,
+            0,
+            100
+          );
+
+          gainXP(8);
+
+          clearCatStates();
+
+          const exitX =
+            bedBox.right -
+            roomBox.left +
+            45;
+
+          setPetPosition(
+            exitX,
+            floorNearY()
+          );
+
+          say("morning!");
+
+          updateUI();
+
+          busy = false;
+        }, 4500);
+      }
+    }
+  );
+});
+
+/* =========================
+   BATH
+========================= */
+
+bath.addEventListener("click", event => {
+  event.stopPropagation();
+
+  if (busy) return;
+
+  busy = true;
+
+  const roomBox = getRoomRect();
+  const bathBox = bath.getBoundingClientRect();
+
+  const approachX =
+    bathBox.left -
+    roomBox.left -
+    35;
+
+  movePetTo(
+    approachX,
+    floorNearY(),
+    {
+      callback: () => {
+        clearCatStates();
+
+        const bathX =
+          bathBox.left -
+          roomBox.left +
+          bathBox.width / 2;
+
+        /*
+          Posisi khusus supaya kepala masuk
+          di dalam bak, bukan turun keluar frame.
+        */
+        const bathTop =
+          bathBox.top -
+          roomBox.top -
+          45;
+
+        petZone.style.transition =
+          "left .3s ease, top .3s ease";
+
+        petZone.style.left =
+          `${bathX}px`;
+
+        petZone.style.top =
+          `${bathTop}px`;
+
+        petZone.style.bottom =
+          "auto";
+
+        petZone.classList.add("in-bath");
+
+        cat.classList.add("bathing");
+
+        bath.classList.add("active");
+
+        say("splash!", 3000);
+
+        showEffect("○");
+
+        setTimeout(() => {
+          showEffect("○");
+        }, 700);
+
+        setTimeout(() => {
+          showEffect("✦");
+        }, 1400);
+
+        setTimeout(() => {
+          data.cleanliness = clamp(
+            data.cleanliness + 40,
+            0,
+            100
+          );
+
+          data.happiness = clamp(
+            data.happiness + 4,
+            0,
+            100
+          );
+
+          gainXP(8);
+
+          bath.classList.remove("active");
+
+          petZone.classList.remove("in-bath");
+
+          clearCatStates();
+
+          const exitX =
+            bathBox.left -
+            roomBox.left -
+            45;
+
+          setPetPosition(
+            exitX,
+            floorNearY()
+          );
+
+          say("fresh!");
+
+          updateUI();
+
+          busy = false;
+        }, 3200);
+      }
+    }
+  );
+});
 
 /* =========================
    BALL DRAG
