@@ -44,14 +44,15 @@ const room = document.getElementById("room");
 const petZone = document.getElementById("petZone");
 const cat = document.getElementById("pixelCat");
 const portraitCat = document.getElementById("portraitCat");
+
 const speech = document.getElementById("speech");
 const effect = document.getElementById("floatingEffect");
 
-const ball = document.getElementById("ball");
-const bath = document.getElementById("bath");
 const bed = document.getElementById("bed");
 const foodBowl = document.getElementById("foodBowl");
 const bowlFood = document.getElementById("bowlFood");
+const bath = document.getElementById("bath");
+const ball = document.getElementById("ball");
 
 /* =========================
    STATE
@@ -61,22 +62,20 @@ let busy = false;
 
 let catDragging = false;
 let dragMoved = false;
-let catDragPointerId = null;
+let catPointerId = null;
 
 let catOffsetX = 0;
 let catOffsetY = 0;
 
-let desiredDragX = 0;
-let desiredDragY = 0;
-let dragFrame = null;
-
 let ballDragging = false;
+let ballPointerId = null;
+
 let ballLastX = 0;
 let ballLastY = 0;
 let ballVX = 0;
 let ballVY = 0;
-let ballAnimationId = null;
 
+let ballAnimationId = null;
 let gravityAnimationId = null;
 let idleTimer = null;
 
@@ -92,14 +91,14 @@ function save() {
 }
 
 /* =========================
-   HELPERS
+   BASIC HELPERS
 ========================= */
 
-function clamp(value, min = 0, max = 100) {
+function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function roomRect() {
+function getRoomRect() {
   return room.getBoundingClientRect();
 }
 
@@ -112,23 +111,139 @@ function petHeight() {
 }
 
 /*
-  Area lantai yang boleh diinjak.
-  Atas = mulai sedikit di bawah garis dinding/lantai.
-  Bawah = batas paling bawah agar pet tidak keluar layar.
+  PENTING:
+  Semua posisi Y sekarang berdasarkan TITIK KAKI,
+  bukan bagian atas kotak pet.
 */
 
-function floorTop() {
-  return room.clientHeight * 0.59;
+function floorFarY() {
+  return room.clientHeight * 0.68;
 }
 
-function floorBottom() {
-  return room.clientHeight - petHeight() + 16;
+function floorNearY() {
+  return room.clientHeight - 18;
 }
+
+/*
+  feetY = lokasi telapak kaki.
+*/
+
+function setPetPosition(x, feetY, instant = true) {
+  const halfWidth = petWidth() / 2;
+
+  const safeX = clamp(
+    x,
+    halfWidth,
+    room.clientWidth - halfWidth
+  );
+
+  const safeFeetY = clamp(
+    feetY,
+    floorFarY(),
+    floorNearY()
+  );
+
+  const top =
+    safeFeetY - petHeight();
+
+  if (instant) {
+    petZone.style.transition = "none";
+  }
+
+  petZone.style.left =
+    `${safeX}px`;
+
+  petZone.style.top =
+    `${top}px`;
+
+  petZone.style.bottom =
+    "auto";
+
+  petZone.dataset.feetY =
+    safeFeetY;
+
+  updateDepth(safeFeetY);
+}
+
+function currentPetX() {
+  const roomBox = getRoomRect();
+  const petBox =
+    petZone.getBoundingClientRect();
+
+  return (
+    petBox.left -
+    roomBox.left +
+    petBox.width / 2
+  );
+}
+
+function currentFeetY() {
+  const stored =
+    parseFloat(
+      petZone.dataset.feetY
+    );
+
+  if (!Number.isNaN(stored)) {
+    return stored;
+  }
+
+  const roomBox = getRoomRect();
+  const petBox =
+    petZone.getBoundingClientRect();
+
+  return (
+    petBox.bottom -
+    roomBox.top
+  );
+}
+
+/* =========================
+   DEPTH / PERSPECTIVE
+========================= */
+
+function updateDepth(feetY) {
+  const range =
+    floorNearY() -
+    floorFarY();
+
+  const progress =
+    clamp(
+      (feetY - floorFarY()) / range,
+      0,
+      1
+    );
+
+  /*
+    belakang = 82%
+    depan = 100%
+  */
+
+  const scale =
+    0.82 + progress * 0.18;
+
+  petZone.style.setProperty(
+    "--depth-scale",
+    scale
+  );
+
+  /*
+    z-index juga berubah.
+    Yang lebih depan muncul di atas.
+  */
+
+  petZone.style.zIndex =
+    Math.round(
+      30 + progress * 30
+    );
+}
+
+/* =========================
+   CAT STATE
+========================= */
 
 function clearCatStates() {
   cat.classList.remove(
     "carried",
-    "drop-bounce",
     "walking",
     "running",
     "happy",
@@ -136,83 +251,12 @@ function clearCatStates() {
     "sleeping",
     "bathing",
     "sitting",
-    "looking"
+    "drop-bounce"
   );
 
   petZone.classList.remove(
-    "on-bed",
-    "is-carried"
-  );
-}
-
-function setPetPixelPosition(x, y) {
-  const rect = roomRect();
-  const halfWidth = petWidth() / 2;
-
-  const safeX = clamp(
-    x,
-    halfWidth,
-    rect.width - halfWidth
-  );
-
-  const safeY = clamp(
-    y,
-    floorTop(),
-    floorBottom()
-  );
-
-  petZone.style.left = `${safeX}px`;
-  petZone.style.top = `${safeY}px`;
-  petZone.style.bottom = "auto";
-  petZone.style.transform = "translateX(-50%)";
-}
-
-function setPetOnGroundAtX(x) {
-  setPetPixelPosition(
-    x,
-    floorBottom()
-  );
-}
-
-function getPetLocalX() {
-  const petRect = petZone.getBoundingClientRect();
-  const roomBox = roomRect();
-
-  return (
-    petRect.left -
-    roomBox.left +
-    petRect.width / 2
-  );
-}
-
-function getPetLocalY() {
-  const petRect = petZone.getBoundingClientRect();
-  const roomBox = roomRect();
-
-  return (
-    petRect.top -
-    roomBox.top
-  );
-}
-
-function getObjectCenterX(element) {
-  const roomBox = roomRect();
-  const box = element.getBoundingClientRect();
-
-  return (
-    box.left -
-    roomBox.left +
-    box.width / 2
-  );
-}
-
-function getObjectTopY(element) {
-  const roomBox = roomRect();
-  const box = element.getBoundingClientRect();
-
-  return (
-    box.top -
-    roomBox.top
+    "is-carried",
+    "on-bed"
   );
 }
 
@@ -245,43 +289,49 @@ function updateUI() {
 }
 
 function setStat(name, value) {
-  const bar = document.getElementById(
-    name + "Bar"
-  );
+  const bar =
+    document.getElementById(
+      name + "Bar"
+    );
 
-  const text = document.getElementById(
-    name + "Text"
-  );
+  const text =
+    document.getElementById(
+      name + "Text"
+    );
 
-  bar.style.width = value + "%";
-  text.textContent = Math.round(value);
+  bar.style.width =
+    value + "%";
+
+  text.textContent =
+    Math.round(value);
 
   if (value < 25) {
-    bar.style.background = "#ca5f59";
+    bar.style.background =
+      "#ca5f59";
   } else if (value < 50) {
-    bar.style.background = "#d7a04f";
+    bar.style.background =
+      "#d7a04f";
   } else {
-    bar.style.background = "#77a870";
+    bar.style.background =
+      "#77a870";
   }
 }
 
-/* =========================
-   FACE / MOOD
-========================= */
-
 function updateMood() {
-  const eyes = document.querySelectorAll(".eye");
-  const mouth = document.querySelector(".mouth");
+  const eyes =
+    document.querySelectorAll(".eye");
+
+  const mouth =
+    document.querySelector(".mouth");
 
   eyes.forEach(eye => {
     eye.style.height = "8px";
     eye.style.top = "24px";
   });
 
+  mouth.style.borderTop = "0";
   mouth.style.borderBottom =
     "3px solid #4c302d";
-
-  mouth.style.borderTop = "0";
 
   if (data.energy < 20) {
     eyes.forEach(eye => {
@@ -301,39 +351,48 @@ function updateMood() {
 }
 
 /* =========================
-   SPEECH / EFFECT
+   TEXT / EFFECT
 ========================= */
 
-function say(text, duration = 1500) {
+function say(text, duration = 1600) {
   speech.textContent = text;
-  speech.classList.remove("hidden");
 
-  clearTimeout(window.speechTimer);
+  speech.classList.remove(
+    "hidden"
+  );
 
-  window.speechTimer = setTimeout(() => {
-    speech.classList.add("hidden");
-  }, duration);
+  clearTimeout(
+    window.speechTimer
+  );
+
+  window.speechTimer =
+    setTimeout(() => {
+      speech.classList.add(
+        "hidden"
+      );
+    }, duration);
 }
 
 function showEffect(symbol) {
-  effect.textContent = symbol;
+  effect.textContent =
+    symbol;
 
   effect.animate(
     [
       {
         opacity: 0,
         transform:
-          "translate(-50%, 6px) scale(.7)"
+          "translate(-50%,0) scale(.6)"
       },
       {
         opacity: 1,
         transform:
-          "translate(-50%, -15px) scale(1)"
+          "translate(-50%,-20px) scale(1)"
       },
       {
         opacity: 0,
         transform:
-          "translate(-50%, -65px) scale(1.2)"
+          "translate(-50%,-65px) scale(1.2)"
       }
     ],
     {
@@ -348,7 +407,7 @@ function showEffect(symbol) {
 }
 
 /* =========================
-   PATTERNS
+   PATTERN
 ========================= */
 
 function applyPattern(pattern) {
@@ -356,14 +415,18 @@ function applyPattern(pattern) {
     cat.classList.remove(name);
 
     if (portraitCat) {
-      portraitCat.classList.remove(name);
+      portraitCat.classList.remove(
+        name
+      );
     }
   });
 
   cat.classList.add(pattern);
 
   if (portraitCat) {
-    portraitCat.classList.add(pattern);
+    portraitCat.classList.add(
+      pattern
+    );
   }
 
   document
@@ -379,40 +442,45 @@ function applyPattern(pattern) {
 document
   .querySelectorAll("[data-pattern]")
   .forEach(button => {
-    button.addEventListener("click", () => {
-      data.pattern =
-        button.dataset.pattern;
+    button.addEventListener(
+      "click",
+      () => {
+        data.pattern =
+          button.dataset.pattern;
 
-      applyPattern(data.pattern);
+        applyPattern(data.pattern);
 
-      say("new look!");
-      showEffect("♥");
+        say("new look!");
+        showEffect("♥");
 
-      save();
-    });
+        save();
+      }
+    );
   });
 
 /* =========================
-   FACE DIRECTION
+   DIRECTION
 ========================= */
 
-function faceTowards(targetX) {
-  const currentX = getPetLocalX();
-
-  if (targetX < currentX) {
-    cat.style.scale = "-1 1";
+function faceTowards(x) {
+  if (x < currentPetX()) {
+    cat.classList.add(
+      "face-left"
+    );
   } else {
-    cat.style.scale = "1 1";
+    cat.classList.remove(
+      "face-left"
+    );
   }
 }
 
 /* =========================
-   2D WALK
+   2D MOVEMENT
 ========================= */
 
-function walkToPoint(
+function movePetTo(
   targetX,
-  targetY,
+  targetFeetY,
   {
     run = false,
     callback = null
@@ -423,17 +491,15 @@ function walkToPoint(
   const safeX = clamp(
     targetX,
     petWidth() / 2,
-    room.clientWidth - petWidth() / 2
+    room.clientWidth -
+      petWidth() / 2
   );
 
-  const safeY = clamp(
-    targetY,
-    floorTop(),
-    floorBottom()
+  const safeFeetY = clamp(
+    targetFeetY,
+    floorFarY(),
+    floorNearY()
   );
-
-  const currentX = getPetLocalX();
-  const currentY = getPetLocalY();
 
   faceTowards(safeX);
 
@@ -441,28 +507,56 @@ function walkToPoint(
     run ? "running" : "walking"
   );
 
-  const distance = Math.hypot(
-    safeX - currentX,
-    safeY - currentY
-  );
+  const dx =
+    safeX - currentPetX();
+
+  const dy =
+    safeFeetY -
+    currentFeetY();
+
+  const distance =
+    Math.hypot(dx, dy);
 
   const duration = run
-    ? clamp(distance * 1.25, 220, 650)
-    : clamp(distance * 1.9, 300, 900);
+    ? clamp(
+        distance * 1.15,
+        200,
+        600
+      )
+    : clamp(
+        distance * 1.8,
+        300,
+        850
+      );
+
+  const targetTop =
+    safeFeetY -
+    petHeight();
 
   petZone.style.transition = `
     left ${duration}ms cubic-bezier(.22,.75,.25,1),
-    top ${duration}ms cubic-bezier(.22,.75,.25,1)
+    top ${duration}ms cubic-bezier(.22,.75,.25,1),
+    transform ${duration}ms ease
   `;
 
-  petZone.style.left = `${safeX}px`;
-  petZone.style.top = `${safeY}px`;
-  petZone.style.bottom = "auto";
+  petZone.style.left =
+    `${safeX}px`;
+
+  petZone.style.top =
+    `${targetTop}px`;
+
+  petZone.style.bottom =
+    "auto";
+
+  petZone.dataset.feetY =
+    safeFeetY;
+
+  updateDepth(safeFeetY);
 
   setTimeout(() => {
     cat.classList.remove(
-      "running",
-      "walking"
+      "walking",
+      "running"
     );
 
     if (callback) {
@@ -471,125 +565,64 @@ function walkToPoint(
   }, duration);
 }
 
-function movePetToX(
-  targetX,
-  {
-    run = false,
-    callback = null
-  } = {}
-) {
-  walkToPoint(
-    targetX,
-    getPetLocalY(),
-    {
-      run,
-      callback
+/* =========================
+   CLICK FLOOR
+========================= */
+
+room.addEventListener(
+  "click",
+  event => {
+    if (
+      busy ||
+      catDragging ||
+      ballDragging
+    ) {
+      return;
     }
-  );
-}
 
-/* =========================
-   BLOCKING FURNITURE
-========================= */
+    if (
+      event.target.closest(
+        ".furniture"
+      ) ||
+      event.target.closest(
+        "#pixelCat"
+      ) ||
+      event.target.closest(
+        "#ball"
+      )
+    ) {
+      return;
+    }
 
-function getBlockingRects() {
-  const roomBox = roomRect();
+    const box =
+      getRoomRect();
 
-  return [
-    bed,
-    foodBowl,
-    bath
-  ]
-    .filter(Boolean)
-    .map(element => {
-      const rect =
-        element.getBoundingClientRect();
+    const x =
+      event.clientX -
+      box.left;
 
-      return {
-        left:
-          rect.left -
-          roomBox.left,
+    const y =
+      event.clientY -
+      box.top;
 
-        right:
-          rect.right -
-          roomBox.left,
+    /*
+      Tembok tidak bisa diinjak.
+    */
 
-        top:
-          rect.top -
-          roomBox.top,
+    if (y < floorFarY()) {
+      say("that's the wall!");
+      return;
+    }
 
-        bottom:
-          rect.bottom -
-          roomBox.top
-      };
-    });
-}
-
-function isBlockedPoint(x, y) {
-  const blocks = getBlockingRects();
-
-  return blocks.some(rect => {
-    return (
-      x > rect.left - 22 &&
-      x < rect.right + 22 &&
-      y > rect.top - 30 &&
-      y < rect.bottom + 25
+    movePetTo(
+      x,
+      y
     );
-  });
-}
+  }
+);
 
 /* =========================
-   CLICK FLOOR TO WALK
-========================= */
-
-room.addEventListener("click", event => {
-  if (
-    busy ||
-    catDragging ||
-    ballDragging
-  ) {
-    return;
-  }
-
-  if (
-    event.target.closest(".furniture") ||
-    event.target.closest("#pixelCat") ||
-    event.target.closest("#ball")
-  ) {
-    return;
-  }
-
-  const rect = roomRect();
-
-  const targetX =
-    event.clientX - rect.left;
-
-  const targetY =
-    event.clientY - rect.top;
-
-  if (targetY < floorTop()) {
-    say("can't climb the wall!");
-    return;
-  }
-
-  if (
-    isBlockedPoint(
-      targetX,
-      targetY
-    )
-  ) {
-    say("something's there!");
-    return;
-  }
-
-  walkToPoint(
-    targetX,
-    targetY
-  );
-});
-
-/* =========================
-   DRAG CAT
+   PICK UP
 ========================= */
 
 cat.addEventListener(
@@ -599,23 +632,24 @@ cat.addEventListener(
 
     catDragging = true;
     dragMoved = false;
-    catDragPointerId =
+
+    catPointerId =
       event.pointerId;
 
     cat.setPointerCapture(
       event.pointerId
     );
 
-    const petRect =
+    const rect =
       petZone.getBoundingClientRect();
 
     catOffsetX =
       event.clientX -
-      petRect.left;
+      rect.left;
 
     catOffsetY =
       event.clientY -
-      petRect.top;
+      rect.top;
 
     clearCatStates();
 
@@ -638,93 +672,60 @@ cat.addEventListener(
 
     dragMoved = true;
 
-    const roomBox = roomRect();
+    const roomBox =
+      getRoomRect();
 
-    desiredDragX =
+    let x =
       event.clientX -
       roomBox.left -
       catOffsetX +
       petWidth() / 2;
 
-    desiredDragY =
+    let y =
       event.clientY -
       roomBox.top -
       catOffsetY;
 
-    desiredDragX = clamp(
-      desiredDragX,
+    x = clamp(
+      x,
       petWidth() / 2,
-      roomBox.width - petWidth() / 2
+      room.clientWidth -
+        petWidth() / 2
     );
 
-    /*
-      Saat DIANGKAT boleh ada di atas lantai,
-      supaya memang terasa sedang diangkat.
-      Nanti saat dilepas baru jatuh.
-    */
-
-    desiredDragY = clamp(
-      desiredDragY,
+    y = clamp(
+      y,
       0,
-      floorBottom()
+      floorNearY() -
+        petHeight()
     );
 
-    if (!dragFrame) {
-      dragFrame =
-        requestAnimationFrame(
-          updateDragFrame
-        );
-    }
+    petZone.style.transition =
+      "none";
+
+    petZone.style.left =
+      `${x}px`;
+
+    petZone.style.top =
+      `${y}px`;
+
+    petZone.style.bottom =
+      "auto";
   }
 );
 
-function updateDragFrame() {
-  dragFrame = null;
-
-  if (!catDragging) return;
-
-  petZone.style.transition =
-    "none";
-
-  const rect = roomRect();
-
-  const safeX = clamp(
-    desiredDragX,
-    petWidth() / 2,
-    rect.width - petWidth() / 2
-  );
-
-  const safeY = clamp(
-    desiredDragY,
-    0,
-    floorBottom()
-  );
-
-  petZone.style.left =
-    `${safeX}px`;
-
-  petZone.style.top =
-    `${safeY}px`;
-
-  petZone.style.bottom =
-    "auto";
-
-  petZone.style.transform =
-    "translateX(-50%)";
-}
-
-function stopCatDrag(event) {
+function releaseCat(event) {
   if (!catDragging) return;
 
   catDragging = false;
 
   try {
     cat.releasePointerCapture(
-      catDragPointerId
+      catPointerId
     );
   } catch {}
 
-  catDragPointerId = null;
+  catPointerId = null;
 
   cat.classList.remove(
     "carried"
@@ -739,52 +740,70 @@ function stopCatDrag(event) {
     return;
   }
 
-  startGravityDrop();
+  dropCat();
 }
 
 cat.addEventListener(
   "pointerup",
-  stopCatDrag
+  releaseCat
 );
 
 cat.addEventListener(
   "pointercancel",
-  stopCatDrag
+  releaseCat
 );
 
 /* =========================
-   GRAVITY DROP
+   GRAVITY
 ========================= */
 
-function startGravityDrop() {
+function dropCat() {
   if (gravityAnimationId) {
     cancelAnimationFrame(
       gravityAnimationId
     );
   }
 
-  let velocityY = 0;
+  let velocity = 0;
+
+  /*
+    Saat dijatuhkan:
+    x tetap.
+    kaki harus berakhir di floorNearY().
+  */
+
+  const targetTop =
+    floorNearY() -
+    petHeight();
 
   function fall() {
-    const currentX =
-      getPetLocalX();
+    const roomBox =
+      getRoomRect();
 
-    let currentY =
-      getPetLocalY();
+    const rect =
+      petZone.getBoundingClientRect();
 
-    velocityY += 0.95;
+    let currentTop =
+      rect.top -
+      roomBox.top;
 
-    currentY += velocityY;
+    velocity += 0.9;
+    currentTop += velocity;
 
-    const ground =
-      floorBottom();
+    if (
+      currentTop >= targetTop
+    ) {
+      currentTop =
+        targetTop;
 
-    if (currentY >= ground) {
-      currentY = ground;
+      petZone.style.top =
+        `${currentTop}px`;
 
-      setPetPixelPosition(
-        currentX,
-        currentY
+      petZone.dataset.feetY =
+        floorNearY();
+
+      updateDepth(
+        floorNearY()
       );
 
       cat.classList.add(
@@ -795,24 +814,16 @@ function startGravityDrop() {
         cat.classList.remove(
           "drop-bounce"
         );
-      }, 380);
+      }, 350);
 
-      gravityAnimationId = null;
+      gravityAnimationId =
+        null;
 
       return;
     }
 
-    petZone.style.transition =
-      "none";
-
-    petZone.style.left =
-      `${currentX}px`;
-
     petZone.style.top =
-      `${currentY}px`;
-
-    petZone.style.bottom =
-      "auto";
+      `${currentTop}px`;
 
     gravityAnimationId =
       requestAnimationFrame(
@@ -821,9 +832,7 @@ function startGravityDrop() {
   }
 
   gravityAnimationId =
-    requestAnimationFrame(
-      fall
-    );
+    requestAnimationFrame(fall);
 }
 
 /* =========================
@@ -833,14 +842,16 @@ function startGravityDrop() {
 function petCat() {
   data.happiness =
     clamp(
-      data.happiness + 5
+      data.happiness + 5,
+      0,
+      100
     );
 
   cat.classList.add(
     "happy"
   );
 
-  say("prrrr");
+  say("prrrrr");
   showEffect("♥");
 
   gainXP(3);
@@ -849,7 +860,7 @@ function petCat() {
     cat.classList.remove(
       "happy"
     );
-  }, 1200);
+  }, 1300);
 
   updateUI();
 }
@@ -867,18 +878,20 @@ foodBowl.addEventListener(
 
     busy = true;
 
-    const targetX =
-      getObjectCenterX(
-        foodBowl
-      );
+    const roomBox =
+      getRoomRect();
 
-    /*
-      Datang ke area dekat mangkuk.
-    */
+    const objectBox =
+      foodBowl.getBoundingClientRect();
 
-    walkToPoint(
-      targetX,
-      floorBottom() - 15,
+    const x =
+      objectBox.left -
+      roomBox.left +
+      objectBox.width / 2;
+
+    movePetTo(
+      x,
+      floorNearY() - 5,
       {
         callback: () => {
           clearCatStates();
@@ -894,20 +907,18 @@ foodBowl.addEventListener(
 
           let bites = 0;
 
-          const interval =
+          const eating =
             setInterval(() => {
               bites++;
 
               bowlFood.style.transform =
                 bites % 2
-                  ? "scale(.72)"
+                  ? "scale(.7)"
                   : "scale(1)";
-
-              showEffect("♪");
 
               if (bites >= 4) {
                 clearInterval(
-                  interval
+                  eating
                 );
 
                 bowlFood.style.opacity =
@@ -918,17 +929,22 @@ foodBowl.addEventListener(
 
                 data.hunger =
                   clamp(
-                    data.hunger + 30
+                    data.hunger + 30,
+                    0,
+                    100
                   );
 
                 data.happiness =
                   clamp(
-                    data.happiness + 4
+                    data.happiness + 4,
+                    0,
+                    100
                   );
 
                 gainXP(10);
 
                 clearCatStates();
+
                 updateUI();
 
                 setTimeout(() => {
@@ -938,7 +954,7 @@ foodBowl.addEventListener(
                   busy = false;
                 }, 400);
               }
-            }, 420);
+            }, 400);
         }
       }
     );
@@ -958,53 +974,61 @@ bed.addEventListener(
 
     busy = true;
 
-    const roomBox = roomRect();
+    const roomBox =
+      getRoomRect();
+
     const bedBox =
       bed.getBoundingClientRect();
 
+    /*
+      Pertama: jalan ke sisi kasur.
+    */
+
     const approachX =
       bedBox.right -
-      roomBox.left -
-      25;
+      roomBox.left +
+      30;
 
-    const approachY =
-      floorBottom() - 10;
-
-    walkToPoint(
+    movePetTo(
       approachX,
-      approachY,
+      floorNearY(),
       {
         callback: () => {
           clearCatStates();
 
+          /*
+            Posisi TENGAH kasur.
+            Kucing tidur di atas mattress.
+          */
+
           const sleepX =
             bedBox.left -
             roomBox.left +
-            bedBox.width * 0.57;
+            bedBox.width * 0.55;
 
-          const sleepY =
+          const sleepTop =
             bedBox.top -
-            roomBox.top -
-            12;
+            roomBox.top +
+            5;
 
           petZone.style.transition =
-            "left .35s ease, top .35s ease";
+            "left .35s ease, top .35s ease, transform .35s ease";
 
           petZone.style.left =
             `${sleepX}px`;
 
           petZone.style.top =
-            `${sleepY}px`;
+            `${sleepTop}px`;
 
           petZone.style.bottom =
             "auto";
 
+          petZone.style.zIndex =
+            "22";
+
           petZone.classList.add(
             "on-bed"
           );
-
-          cat.style.scale =
-            "1 1";
 
           cat.classList.add(
             "sleeping"
@@ -1022,28 +1046,42 @@ bed.addEventListener(
           }, 1200);
 
           setTimeout(() => {
+            showEffect("Z");
+          }, 2500);
+
+          setTimeout(() => {
             data.energy =
               clamp(
-                data.energy + 38
+                data.energy + 38,
+                0,
+                100
               );
 
             data.hunger =
               clamp(
-                data.hunger - 7
+                data.hunger - 7,
+                0,
+                100
               );
 
             gainXP(8);
 
             clearCatStates();
 
-            const exitX =
-              bedBox.right -
-              roomBox.left +
-              40;
+            /*
+              Turun di samping kasur.
+            */
 
-            setPetPixelPosition(
-              exitX,
-              floorBottom()
+            setPetPosition(
+              clamp(
+                bedBox.right -
+                  roomBox.left +
+                  45,
+                petWidth() / 2,
+                room.clientWidth -
+                  petWidth() / 2
+              ),
+              floorNearY()
             );
 
             say("morning!");
@@ -1051,6 +1089,7 @@ bed.addEventListener(
             updateUI();
 
             busy = false;
+
           }, 4500);
         }
       }
@@ -1071,18 +1110,20 @@ bath.addEventListener(
 
     busy = true;
 
-    const roomBox = roomRect();
+    const roomBox =
+      getRoomRect();
+
     const bathBox =
       bath.getBoundingClientRect();
 
     const approachX =
       bathBox.left -
       roomBox.left -
-      30;
+      35;
 
-    walkToPoint(
+    movePetTo(
       approachX,
-      floorBottom() - 10,
+      floorNearY(),
       {
         callback: () => {
           clearCatStates();
@@ -1092,10 +1133,10 @@ bath.addEventListener(
             roomBox.left +
             bathBox.width / 2;
 
-          const bathY =
+          const bathTop =
             bathBox.top -
-            roomBox.top +
-            8;
+            roomBox.top -
+            5;
 
           petZone.style.transition =
             "left .3s ease, top .3s ease";
@@ -1104,10 +1145,10 @@ bath.addEventListener(
             `${bathX}px`;
 
           petZone.style.top =
-            `${bathY}px`;
+            `${bathTop}px`;
 
-          petZone.style.bottom =
-            "auto";
+          petZone.style.zIndex =
+            "25";
 
           cat.classList.add(
             "bathing"
@@ -1117,26 +1158,21 @@ bath.addEventListener(
             "active"
           );
 
-          say(
-            "splash!",
-            3000
-          );
-
-          showEffect("○");
-
-          setTimeout(() => {
-            showEffect("✦");
-          }, 900);
+          say("splash!", 3000);
 
           setTimeout(() => {
             data.cleanliness =
               clamp(
-                data.cleanliness + 40
+                data.cleanliness + 40,
+                0,
+                100
               );
 
             data.happiness =
               clamp(
-                data.happiness + 4
+                data.happiness + 4,
+                0,
+                100
               );
 
             gainXP(8);
@@ -1147,14 +1183,11 @@ bath.addEventListener(
 
             clearCatStates();
 
-            const exitX =
+            setPetPosition(
               bathBox.left -
-              roomBox.left -
-              40;
-
-            setPetPixelPosition(
-              exitX,
-              floorBottom()
+                roomBox.left -
+                45,
+              floorNearY()
             );
 
             say("fresh!");
@@ -1162,6 +1195,7 @@ bath.addEventListener(
             updateUI();
 
             busy = false;
+
           }, 3000);
         }
       }
@@ -1184,6 +1218,9 @@ ball.addEventListener(
     }
 
     ballDragging = true;
+
+    ballPointerId =
+      event.pointerId;
 
     ball.setPointerCapture(
       event.pointerId
@@ -1242,14 +1279,14 @@ ball.addEventListener(
   }
 );
 
-function endBallDrag(event) {
+function releaseBall(event) {
   if (!ballDragging) return;
 
   ballDragging = false;
 
   try {
     ball.releasePointerCapture(
-      event.pointerId
+      ballPointerId
     );
   } catch {}
 
@@ -1258,12 +1295,12 @@ function endBallDrag(event) {
 
 ball.addEventListener(
   "pointerup",
-  endBallDrag
+  releaseBall
 );
 
 ball.addEventListener(
   "pointercancel",
-  endBallDrag
+  releaseBall
 );
 
 /* =========================
@@ -1300,25 +1337,25 @@ function throwBall() {
   const gravity = 0.48;
 
   function physics() {
-    const box = roomRect();
+    const box =
+      getRoomRect();
 
     const minX =
-      box.left + 5;
+      box.left + 4;
 
     const maxX =
-      box.right - 49;
+      box.right - 48;
 
     const minY =
-      box.top + 5;
+      box.top + 4;
 
     const maxY =
-      box.bottom - 49;
+      box.bottom - 48;
 
     x += vx;
     y += vy;
 
     vy += gravity;
-
     vx *= 0.986;
 
     if (
@@ -1338,7 +1375,6 @@ function throwBall() {
       y = maxY;
 
       vy *= -0.5;
-
       vx *= 0.89;
     }
 
@@ -1381,31 +1417,18 @@ function throwBall() {
 ========================= */
 
 function chaseBall(ballScreenX) {
-  const box = roomRect();
+  const box =
+    getRoomRect();
 
   const x =
     ballScreenX -
     box.left;
 
-  /*
-    Bola berhenti di lantai.
-    Kita clamp agar pet ngejar di area lantai.
-  */
-
-  const targetX = clamp(
-    x,
-    petWidth() / 2,
-    room.clientWidth - petWidth() / 2
-  );
-
-  const targetY =
-    floorBottom() - 5;
-
   say("BALL!!");
 
-  walkToPoint(
-    targetX,
-    targetY,
+  movePetTo(
+    x,
+    floorNearY() - 5,
     {
       run: true,
 
@@ -1418,17 +1441,23 @@ function chaseBall(ballScreenX) {
 
         data.happiness =
           clamp(
-            data.happiness + 15
+            data.happiness + 15,
+            0,
+            100
           );
 
         data.energy =
           clamp(
-            data.energy - 8
+            data.energy - 8,
+            0,
+            100
           );
 
         data.hunger =
           clamp(
-            data.hunger - 3
+            data.hunger - 3,
+            0,
+            100
           );
 
         gainXP(12);
@@ -1443,6 +1472,7 @@ function chaseBall(ballScreenX) {
           resetBall();
 
           busy = false;
+
         }, 800);
       }
     }
@@ -1476,7 +1506,6 @@ function gainXP(amount) {
     data.xp -= 100;
 
     data.level++;
-
     data.coins += 50;
 
     setTimeout(() => {
@@ -1518,12 +1547,13 @@ function renamePet() {
 ========================= */
 
 function resetPet() {
-  const ok =
-    confirm(
+  if (
+    !confirm(
       "Reset all pet progress?"
-    );
-
-  if (!ok) return;
+    )
+  ) {
+    return;
+  }
 
   data = {
     ...defaultData
@@ -1531,12 +1561,10 @@ function resetPet() {
 
   clearCatStates();
 
-  setPetPixelPosition(
+  setPetPosition(
     room.clientWidth / 2,
-    floorBottom()
+    floorNearY()
   );
-
-  cat.style.scale = "1 1";
 
   resetBall();
 
@@ -1546,7 +1574,7 @@ function resetPet() {
 }
 
 /* =========================
-   IDLE BEHAVIOR
+   IDLE AI
 ========================= */
 
 function scheduleIdleBehaviour() {
@@ -1579,9 +1607,10 @@ function scheduleIdleBehaviour() {
         cat.classList.remove(
           "sitting"
         );
-      }, 2500);
+      }, 2200);
 
       scheduleIdleBehaviour();
+
       return;
     }
 
@@ -1599,52 +1628,44 @@ function scheduleIdleBehaviour() {
         cat.classList.remove(
           "sitting"
         );
-      }, 2200);
+      }, 2000);
     }
 
-    else if (random < 0.65) {
-      const randomX =
+    else if (random < 0.7) {
+      const x =
         room.clientWidth *
         (
-          0.18 +
-          Math.random() * 0.64
+          0.16 +
+          Math.random() * 0.68
         );
 
-      const randomY =
-        floorTop() +
+      const y =
+        floorFarY() +
+        15 +
         Math.random() *
         (
-          floorBottom() -
-          floorTop()
+          floorNearY() -
+          floorFarY() -
+          25
         );
 
-      if (
-        !isBlockedPoint(
-          randomX,
-          randomY
-        )
-      ) {
-        walkToPoint(
-          randomX,
-          randomY
-        );
-      }
+      movePetTo(x, y);
     }
 
     else {
-      const messages = [
+      const texts = [
         "meow~",
         "human?",
-        "pet me",
+        "pet me!",
         "...",
         "play?"
       ];
 
       say(
-        messages[
+        texts[
           Math.floor(
             Math.random() *
-            messages.length
+            texts.length
           )
         ]
       );
@@ -1652,32 +1673,40 @@ function scheduleIdleBehaviour() {
 
     scheduleIdleBehaviour();
 
-  }, 7000 + Math.random() * 5000);
+  }, 6500 + Math.random() * 4500);
 }
 
 /* =========================
-   STAT DECAY
+   DECAY
 ========================= */
 
 setInterval(() => {
   data.hunger =
     clamp(
-      data.hunger - 1.5
+      data.hunger - 1.5,
+      0,
+      100
     );
 
   data.happiness =
     clamp(
-      data.happiness - 0.55
+      data.happiness - .55,
+      0,
+      100
     );
 
   data.energy =
     clamp(
-      data.energy - 0.75
+      data.energy - .75,
+      0,
+      100
     );
 
   data.cleanliness =
     clamp(
-      data.cleanliness - 0.45
+      data.cleanliness - .45,
+      0,
+      100
     );
 
   updateUI();
@@ -1691,9 +1720,9 @@ setInterval(() => {
 updateUI();
 
 requestAnimationFrame(() => {
-  setPetPixelPosition(
+  setPetPosition(
     room.clientWidth / 2,
-    floorBottom()
+    floorNearY() - 40
   );
 });
 
