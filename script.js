@@ -1,5 +1,5 @@
 const defaultData = {
-  name: "Mochi",
+  name: "Sucipto",
   hunger: 80,
   happiness: 80,
   energy: 80,
@@ -36,10 +36,6 @@ if (!validPatterns.includes(data.pattern)) {
   data.pattern = "orange";
 }
 
-/* =========================
-   ELEMENTS
-========================= */
-
 const room = document.getElementById("room");
 const petZone = document.getElementById("petZone");
 const cat = document.getElementById("pixelCat");
@@ -53,10 +49,6 @@ const foodBowl = document.getElementById("foodBowl");
 const bowlFood = document.getElementById("bowlFood");
 const bath = document.getElementById("bath");
 const ball = document.getElementById("ball");
-
-/* =========================
-   STATE
-========================= */
 
 let busy = false;
 
@@ -72,16 +64,13 @@ let ballPointerId = null;
 
 let ballLastX = 0;
 let ballLastY = 0;
+
 let ballVX = 0;
 let ballVY = 0;
 
 let ballAnimationId = null;
 let gravityAnimationId = null;
 let idleTimer = null;
-
-/* =========================
-   SAVE
-========================= */
 
 function save() {
   localStorage.setItem(
@@ -90,12 +79,11 @@ function save() {
   );
 }
 
-/* =========================
-   BASIC HELPERS
-========================= */
-
 function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
+  return Math.max(
+    min,
+    Math.min(max, value)
+  );
 }
 
 function getRoomRect() {
@@ -111,30 +99,91 @@ function petHeight() {
 }
 
 /*
-  PENTING:
-  Semua posisi Y sekarang berdasarkan TITIK KAKI,
-  bukan bagian atas kotak pet.
+  kaki paling belakang
 */
-
 function floorFarY() {
   return room.clientHeight * 0.68;
 }
 
+/*
+  kaki paling depan
+*/
 function floorNearY() {
   return room.clientHeight - 18;
 }
 
-/*
-  feetY = lokasi telapak kaki.
-*/
+function currentPetX() {
+  const r = petZone.getBoundingClientRect();
+  const roomR = getRoomRect();
 
-function setPetPosition(x, feetY, instant = true) {
-  const halfWidth = petWidth() / 2;
+  return (
+    r.left -
+    roomR.left +
+    r.width / 2
+  );
+}
 
+function currentFeetY() {
+  const stored =
+    parseFloat(
+      petZone.dataset.feetY
+    );
+
+  if (!Number.isNaN(stored)) {
+    return stored;
+  }
+
+  const r =
+    petZone.getBoundingClientRect();
+
+  const roomR =
+    getRoomRect();
+
+  return (
+    r.bottom -
+    roomR.top
+  );
+}
+
+function updateDepth(feetY) {
+  const range =
+    floorNearY() -
+    floorFarY();
+
+  const progress =
+    clamp(
+      (feetY - floorFarY()) /
+      range,
+      0,
+      1
+    );
+
+  const scale =
+    0.82 +
+    progress * 0.18;
+
+  petZone.style.setProperty(
+    "--depth-scale",
+    scale
+  );
+
+  petZone.style.zIndex =
+    Math.round(
+      30 +
+      progress * 30
+    );
+}
+
+function setPetPosition(
+  x,
+  feetY,
+  instant = true
+) {
   const safeX = clamp(
     x,
-    halfWidth,
-    room.clientWidth - halfWidth
+    petWidth() / 2,
+    room.clientWidth -
+      petWidth() / 2
   );
 
   const safeFeetY = clamp(
@@ -144,10 +193,12 @@ function setPetPosition(x, feetY, instant = true) {
   );
 
   const top =
-    safeFeetY - petHeight();
+    safeFeetY -
+    petHeight();
 
   if (instant) {
-    petZone.style.transition = "none";
+    petZone.style.transition =
+      "none";
   }
 
   petZone.style.left =
@@ -162,84 +213,10 @@ function setPetPosition(x, feetY, instant = true) {
   petZone.dataset.feetY =
     safeFeetY;
 
-  updateDepth(safeFeetY);
-}
-
-function currentPetX() {
-  const roomBox = getRoomRect();
-  const petBox =
-    petZone.getBoundingClientRect();
-
-  return (
-    petBox.left -
-    roomBox.left +
-    petBox.width / 2
+  updateDepth(
+    safeFeetY
   );
 }
-
-function currentFeetY() {
-  const stored =
-    parseFloat(
-      petZone.dataset.feetY
-    );
-
-  if (!Number.isNaN(stored)) {
-    return stored;
-  }
-
-  const roomBox = getRoomRect();
-  const petBox =
-    petZone.getBoundingClientRect();
-
-  return (
-    petBox.bottom -
-    roomBox.top
-  );
-}
-
-/* =========================
-   DEPTH / PERSPECTIVE
-========================= */
-
-function updateDepth(feetY) {
-  const range =
-    floorNearY() -
-    floorFarY();
-
-  const progress =
-    clamp(
-      (feetY - floorFarY()) / range,
-      0,
-      1
-    );
-
-  /*
-    belakang = 82%
-    depan = 100%
-  */
-
-  const scale =
-    0.82 + progress * 0.18;
-
-  petZone.style.setProperty(
-    "--depth-scale",
-    scale
-  );
-
-  /*
-    z-index juga berubah.
-    Yang lebih depan muncul di atas.
-  */
-
-  petZone.style.zIndex =
-    Math.round(
-      30 + progress * 30
-    );
-}
-
-/* =========================
-   CAT STATE
-========================= */
 
 function clearCatStates() {
   cat.classList.remove(
@@ -250,7 +227,6 @@ function clearCatStates() {
     "eating",
     "sleeping",
     "bathing",
-    "sitting",
     "drop-bounce"
   );
 
@@ -259,10 +235,6 @@ function clearCatStates() {
     "on-bed"
   );
 }
-
-/* =========================
-   UI
-========================= */
 
 function updateUI() {
   document.getElementById("petName").textContent =
@@ -283,78 +255,26 @@ function updateUI() {
   setStat("clean", data.cleanliness);
 
   applyPattern(data.pattern);
-  updateMood();
 
   save();
 }
 
 function setStat(name, value) {
-  const bar =
-    document.getElementById(
-      name + "Bar"
-    );
-
-  const text =
-    document.getElementById(
-      name + "Text"
-    );
-
-  bar.style.width =
+  document.getElementById(
+    name + "Bar"
+  ).style.width =
     value + "%";
 
-  text.textContent =
+  document.getElementById(
+    name + "Text"
+  ).textContent =
     Math.round(value);
-
-  if (value < 25) {
-    bar.style.background =
-      "#ca5f59";
-  } else if (value < 50) {
-    bar.style.background =
-      "#d7a04f";
-  } else {
-    bar.style.background =
-      "#77a870";
-  }
 }
 
-function updateMood() {
-  const eyes =
-    document.querySelectorAll(".eye");
-
-  const mouth =
-    document.querySelector(".mouth");
-
-  eyes.forEach(eye => {
-    eye.style.height = "8px";
-    eye.style.top = "24px";
-  });
-
-  mouth.style.borderTop = "0";
-  mouth.style.borderBottom =
-    "3px solid #4c302d";
-
-  if (data.energy < 20) {
-    eyes.forEach(eye => {
-      eye.style.height = "3px";
-      eye.style.top = "28px";
-    });
-  }
-
-  if (
-    data.hunger < 15 ||
-    data.happiness < 25
-  ) {
-    mouth.style.borderBottom = "0";
-    mouth.style.borderTop =
-      "3px solid #4c302d";
-  }
-}
-
-/* =========================
-   TEXT / EFFECT
-========================= */
-
-function say(text, duration = 1600) {
+function say(
+  text,
+  duration = 1500
+) {
   speech.textContent = text;
 
   speech.classList.remove(
@@ -374,8 +294,7 @@ function say(text, duration = 1600) {
 }
 
 function showEffect(symbol) {
-  effect.textContent =
-    symbol;
+  effect.textContent = symbol;
 
   effect.animate(
     [
@@ -387,7 +306,7 @@ function showEffect(symbol) {
       {
         opacity: 1,
         transform:
-          "translate(-50%,-20px) scale(1)"
+          "translate(-50%,-18px) scale(1)"
       },
       {
         opacity: 0,
@@ -406,31 +325,19 @@ function showEffect(symbol) {
   }, 900);
 }
 
-/* =========================
-   PATTERN
-========================= */
-
 function applyPattern(pattern) {
   validPatterns.forEach(name => {
     cat.classList.remove(name);
-
-    if (portraitCat) {
-      portraitCat.classList.remove(
-        name
-      );
-    }
+    portraitCat.classList.remove(name);
   });
 
   cat.classList.add(pattern);
-
-  if (portraitCat) {
-    portraitCat.classList.add(
-      pattern
-    );
-  }
+  portraitCat.classList.add(pattern);
 
   document
-    .querySelectorAll("[data-pattern]")
+    .querySelectorAll(
+      "[data-pattern]"
+    )
     .forEach(button => {
       button.classList.toggle(
         "active-pattern",
@@ -448,19 +355,16 @@ document
         data.pattern =
           button.dataset.pattern;
 
-        applyPattern(data.pattern);
-
-        say("new look!");
-        showEffect("♥");
+        applyPattern(
+          data.pattern
+        );
 
         save();
+
+        say("new look!");
       }
     );
   });
-
-/* =========================
-   DIRECTION
-========================= */
 
 function faceTowards(x) {
   if (x < currentPetX()) {
@@ -473,10 +377,6 @@ function faceTowards(x) {
     );
   }
 }
-
-/* =========================
-   2D MOVEMENT
-========================= */
 
 function movePetTo(
   targetX,
@@ -495,47 +395,55 @@ function movePetTo(
       petWidth() / 2
   );
 
-  const safeFeetY = clamp(
+  const safeY = clamp(
     targetFeetY,
     floorFarY(),
     floorNearY()
   );
 
-  faceTowards(safeX);
+  faceTowards(
+    safeX
+  );
 
   cat.classList.add(
-    run ? "running" : "walking"
+    run
+      ? "running"
+      : "walking"
   );
 
   const dx =
-    safeX - currentPetX();
+    safeX -
+    currentPetX();
 
   const dy =
-    safeFeetY -
+    safeY -
     currentFeetY();
 
   const distance =
-    Math.hypot(dx, dy);
+    Math.hypot(
+      dx,
+      dy
+    );
 
   const duration = run
     ? clamp(
-        distance * 1.15,
-        200,
-        600
+        distance * 1.2,
+        220,
+        650
       )
     : clamp(
-        distance * 1.8,
-        300,
-        850
+        distance * 2.4,
+        400,
+        1200
       );
 
-  const targetTop =
-    safeFeetY -
+  const top =
+    safeY -
     petHeight();
 
   petZone.style.transition = `
-    left ${duration}ms cubic-bezier(.22,.75,.25,1),
-    top ${duration}ms cubic-bezier(.22,.75,.25,1),
+    left ${duration}ms cubic-bezier(.22,.7,.25,1),
+    top ${duration}ms cubic-bezier(.22,.7,.25,1),
     transform ${duration}ms ease
   `;
 
@@ -543,15 +451,14 @@ function movePetTo(
     `${safeX}px`;
 
   petZone.style.top =
-    `${targetTop}px`;
-
-  petZone.style.bottom =
-    "auto";
+    `${top}px`;
 
   petZone.dataset.feetY =
-    safeFeetY;
+    safeY;
 
-  updateDepth(safeFeetY);
+  updateDepth(
+    safeY
+  );
 
   setTimeout(() => {
     cat.classList.remove(
@@ -565,9 +472,7 @@ function movePetTo(
   }, duration);
 }
 
-/* =========================
-   CLICK FLOOR
-========================= */
+/* CLICK FLOOR */
 
 room.addEventListener(
   "click",
@@ -576,9 +481,7 @@ room.addEventListener(
       busy ||
       catDragging ||
       ballDragging
-    ) {
-      return;
-    }
+    ) return;
 
     if (
       event.target.closest(
@@ -594,22 +497,21 @@ room.addEventListener(
       return;
     }
 
-    const box =
+    const roomR =
       getRoomRect();
 
     const x =
       event.clientX -
-      box.left;
+      roomR.left;
 
     const y =
       event.clientY -
-      box.top;
+      roomR.top;
 
-    /*
-      Tembok tidak bisa diinjak.
-    */
-
-    if (y < floorFarY()) {
+    if (
+      y <
+      floorFarY()
+    ) {
       say("that's the wall!");
       return;
     }
@@ -621,9 +523,7 @@ room.addEventListener(
   }
 );
 
-/* =========================
-   PICK UP
-========================= */
+/* PICK UP */
 
 cat.addEventListener(
   "pointerdown",
@@ -657,10 +557,6 @@ cat.addEventListener(
       "carried"
     );
 
-    petZone.classList.add(
-      "is-carried"
-    );
-
     say("mrrp?");
   }
 );
@@ -672,18 +568,18 @@ cat.addEventListener(
 
     dragMoved = true;
 
-    const roomBox =
+    const roomR =
       getRoomRect();
 
     let x =
       event.clientX -
-      roomBox.left -
+      roomR.left -
       catOffsetX +
       petWidth() / 2;
 
     let y =
       event.clientY -
-      roomBox.top -
+      roomR.top -
       catOffsetY;
 
     x = clamp(
@@ -708,9 +604,6 @@ cat.addEventListener(
 
     petZone.style.top =
       `${y}px`;
-
-    petZone.style.bottom =
-      "auto";
   }
 );
 
@@ -725,18 +618,33 @@ function releaseCat(event) {
     );
   } catch {}
 
-  catPointerId = null;
-
   cat.classList.remove(
     "carried"
   );
 
-  petZone.classList.remove(
-    "is-carried"
-  );
-
   if (!dragMoved) {
-    petCat();
+    data.happiness =
+      clamp(
+        data.happiness + 5,
+        0,
+        100
+      );
+
+    cat.classList.add(
+      "happy"
+    );
+
+    say("prrr");
+    showEffect("♥");
+
+    setTimeout(() => {
+      cat.classList.remove(
+        "happy"
+      );
+    }, 1200);
+
+    updateUI();
+
     return;
   }
 
@@ -753,51 +661,35 @@ cat.addEventListener(
   releaseCat
 );
 
-/* =========================
-   GRAVITY
-========================= */
+/* DROP */
 
 function dropCat() {
-  if (gravityAnimationId) {
-    cancelAnimationFrame(
-      gravityAnimationId
-    );
-  }
-
   let velocity = 0;
-
-  /*
-    Saat dijatuhkan:
-    x tetap.
-    kaki harus berakhir di floorNearY().
-  */
 
   const targetTop =
     floorNearY() -
     petHeight();
 
   function fall() {
-    const roomBox =
+    const roomR =
       getRoomRect();
 
     const rect =
       petZone.getBoundingClientRect();
 
-    let currentTop =
+    let top =
       rect.top -
-      roomBox.top;
+      roomR.top;
 
-    velocity += 0.9;
-    currentTop += velocity;
+    velocity += .9;
+    top += velocity;
 
-    if (
-      currentTop >= targetTop
-    ) {
-      currentTop =
+    if (top >= targetTop) {
+      top =
         targetTop;
 
       petZone.style.top =
-        `${currentTop}px`;
+        `${top}px`;
 
       petZone.dataset.feetY =
         floorNearY();
@@ -816,383 +708,331 @@ function dropCat() {
         );
       }, 350);
 
-      gravityAnimationId =
-        null;
-
       return;
     }
 
     petZone.style.top =
-      `${currentTop}px`;
+      `${top}px`;
 
-    gravityAnimationId =
-      requestAnimationFrame(
-        fall
-      );
+    requestAnimationFrame(
+      fall
+    );
   }
 
-  gravityAnimationId =
-    requestAnimationFrame(fall);
-}
-
-/* =========================
-   PETTING
-========================= */
-
-function petCat() {
-  data.happiness =
-    clamp(
-      data.happiness + 5,
-      0,
-      100
-    );
-
-  cat.classList.add(
-    "happy"
+  requestAnimationFrame(
+    fall
   );
-
-  say("prrrrr");
-  showEffect("♥");
-
-  gainXP(3);
-
-  setTimeout(() => {
-    cat.classList.remove(
-      "happy"
-    );
-  }, 1300);
-
-  updateUI();
 }
 
-/* =========================
-   FOOD
-========================= */
+/* FOOD */
 
-foodBowl.addEventListener("click", event => {
-  event.stopPropagation();
+foodBowl.addEventListener(
+  "click",
+  event => {
+    event.stopPropagation();
 
-  if (busy) return;
+    if (busy) return;
 
-  busy = true;
+    busy = true;
 
-  const roomBox = getRoomRect();
-  const bowlBox = foodBowl.getBoundingClientRect();
+    const roomR =
+      getRoomRect();
 
-  const targetX =
-    bowlBox.left -
-    roomBox.left +
-    bowlBox.width / 2;
+    const bowlR =
+      foodBowl.getBoundingClientRect();
 
-  const targetY =
-    floorNearY() - 5;
+    const x =
+      bowlR.left -
+      roomR.left +
+      bowlR.width / 2;
 
-  movePetTo(
-    targetX,
-    targetY,
-    {
-      callback: () => {
-        clearCatStates();
+    movePetTo(
+      x,
+      floorNearY() - 5,
+      {
+        callback: () => {
+          clearCatStates();
 
-        petZone.classList.add("at-food");
+          cat.classList.add(
+            "eating"
+          );
 
-        cat.classList.add("eating");
+          say(
+            "nom nom...",
+            2200
+          );
 
-        say("nom nom...", 2200);
+          let bites = 0;
 
-        let bites = 0;
+          const timer =
+            setInterval(() => {
+              bites++;
 
-        const eatingTimer =
-          setInterval(() => {
-            bites++;
+              bowlFood.style.transform =
+                bites % 2
+                  ? "scale(.7)"
+                  : "scale(1)";
 
-            bowlFood.style.transform =
-              bites % 2
-                ? "scale(.65)"
-                : "scale(1)";
+              if (bites >= 4) {
+                clearInterval(
+                  timer
+                );
 
-            if (bites === 2) {
-              bowlFood.style.opacity = ".6";
-            }
+                bowlFood.style.opacity =
+                  ".25";
 
-            if (bites === 3) {
-              bowlFood.style.opacity = ".35";
-            }
+                bowlFood.style.transform =
+                  "";
 
-            if (bites >= 4) {
-              clearInterval(eatingTimer);
+                data.hunger =
+                  clamp(
+                    data.hunger + 30,
+                    0,
+                    100
+                  );
 
-              bowlFood.style.opacity = ".15";
+                data.happiness =
+                  clamp(
+                    data.happiness + 4,
+                    0,
+                    100
+                  );
 
-              bowlFood.style.transform = "";
+                clearCatStates();
 
-              data.hunger = clamp(
-                data.hunger + 30,
+                updateUI();
+
+                setTimeout(() => {
+                  bowlFood.style.opacity =
+                    "1";
+
+                  busy = false;
+                }, 400);
+              }
+            }, 400);
+        }
+      }
+    );
+  }
+);
+
+/* BED */
+
+bed.addEventListener(
+  "click",
+  event => {
+    event.stopPropagation();
+
+    if (busy) return;
+
+    busy = true;
+
+    const roomR =
+      getRoomRect();
+
+    const bedR =
+      bed.getBoundingClientRect();
+
+    const approachX =
+      bedR.right -
+      roomR.left +
+      35;
+
+    movePetTo(
+      approachX,
+      floorNearY(),
+      {
+        callback: () => {
+          clearCatStates();
+
+          /*
+            POSISI TIDUR BARU:
+            lebih masuk ke tengah kasur,
+            dan lebih naik.
+          */
+
+          const sleepX =
+            bedR.left -
+            roomR.left +
+            bedR.width * .58;
+
+          const sleepTop =
+            bedR.top -
+            roomR.top -
+            2;
+
+          petZone.style.transition =
+            "left .35s ease, top .35s ease";
+
+          petZone.style.left =
+            `${sleepX}px`;
+
+          petZone.style.top =
+            `${sleepTop}px`;
+
+          petZone.style.zIndex =
+            "18";
+
+          cat.classList.add(
+            "sleeping"
+          );
+
+          petZone.classList.add(
+            "on-bed"
+          );
+
+          say(
+            "zzz...",
+            4500
+          );
+
+          showEffect("Z");
+
+          setTimeout(() => {
+            showEffect("z");
+          }, 1200);
+
+          setTimeout(() => {
+            data.energy =
+              clamp(
+                data.energy + 38,
                 0,
                 100
               );
 
-              data.happiness = clamp(
+            data.hunger =
+              clamp(
+                data.hunger - 7,
+                0,
+                100
+              );
+
+            clearCatStates();
+
+            setPetPosition(
+              bedR.right -
+              roomR.left +
+              45,
+              floorNearY()
+            );
+
+            say("morning!");
+
+            updateUI();
+
+            busy = false;
+
+          }, 4500);
+        }
+      }
+    );
+  }
+);
+
+/* BATH */
+
+bath.addEventListener(
+  "click",
+  event => {
+    event.stopPropagation();
+
+    if (busy) return;
+
+    busy = true;
+
+    const roomR =
+      getRoomRect();
+
+    const bathR =
+      bath.getBoundingClientRect();
+
+    movePetTo(
+      bathR.left -
+      roomR.left -
+      35,
+      floorNearY(),
+      {
+        callback: () => {
+          clearCatStates();
+
+          const x =
+            bathR.left -
+            roomR.left +
+            bathR.width / 2;
+
+          const top =
+            bathR.top -
+            roomR.top -
+            45;
+
+          petZone.style.transition =
+            "left .3s ease, top .3s ease";
+
+          petZone.style.left =
+            `${x}px`;
+
+          petZone.style.top =
+            `${top}px`;
+
+          cat.classList.add(
+            "bathing"
+          );
+
+          bath.classList.add(
+            "active"
+          );
+
+          say("splash!");
+
+          setTimeout(() => {
+            data.cleanliness =
+              clamp(
+                data.cleanliness + 40,
+                0,
+                100
+              );
+
+            data.happiness =
+              clamp(
                 data.happiness + 4,
                 0,
                 100
               );
 
-              gainXP(10);
+            bath.classList.remove(
+              "active"
+            );
 
-              cat.classList.remove("eating");
+            clearCatStates();
 
-              petZone.classList.remove("at-food");
+            setPetPosition(
+              bathR.left -
+              roomR.left -
+              45,
+              floorNearY()
+            );
 
-              updateUI();
+            say("fresh!");
 
-              setTimeout(() => {
-                bowlFood.style.opacity = "1";
+            updateUI();
 
-                busy = false;
-              }, 500);
-            }
-          }, 420);
+            busy = false;
+
+          }, 3000);
+        }
       }
-    }
-  );
-});
+    );
+  }
+);
 
-/* =========================
-   BED
-========================= */
-
-bed.addEventListener("click", event => {
-  event.stopPropagation();
-
-  if (busy) return;
-
-  busy = true;
-
-  const roomBox = getRoomRect();
-  const bedBox = bed.getBoundingClientRect();
-
-  const approachX =
-    bedBox.right -
-    roomBox.left +
-    35;
-
-  movePetTo(
-    approachX,
-    floorNearY(),
-    {
-      callback: () => {
-        clearCatStates();
-
-        const sleepX =
-          bedBox.left -
-          roomBox.left +
-          bedBox.width * 0.55;
-
-        /*
-          anchor kasur:
-          pakai posisi atas kasur + offset tetap.
-          Jangan berdasarkan tinggi sprite lagi.
-        */
-        const sleepTop =
-          bedBox.top -
-          roomBox.top -
-          18;
-
-        petZone.style.transition =
-          "left .35s ease, top .35s ease";
-
-        petZone.style.left =
-          `${sleepX}px`;
-
-        petZone.style.top =
-          `${sleepTop}px`;
-
-        petZone.style.bottom =
-          "auto";
-
-        petZone.classList.add("on-bed");
-
-        cat.classList.add("sleeping");
-
-        say("zzz...", 4500);
-
-        showEffect("Z");
-
-        setTimeout(() => {
-          showEffect("z");
-        }, 1200);
-
-        setTimeout(() => {
-          showEffect("Z");
-        }, 2500);
-
-        setTimeout(() => {
-          data.energy = clamp(
-            data.energy + 38,
-            0,
-            100
-          );
-
-          data.hunger = clamp(
-            data.hunger - 7,
-            0,
-            100
-          );
-
-          gainXP(8);
-
-          clearCatStates();
-
-          const exitX =
-            bedBox.right -
-            roomBox.left +
-            45;
-
-          setPetPosition(
-            exitX,
-            floorNearY()
-          );
-
-          say("morning!");
-
-          updateUI();
-
-          busy = false;
-        }, 4500);
-      }
-    }
-  );
-});
-
-/* =========================
-   BATH
-========================= */
-
-bath.addEventListener("click", event => {
-  event.stopPropagation();
-
-  if (busy) return;
-
-  busy = true;
-
-  const roomBox = getRoomRect();
-  const bathBox = bath.getBoundingClientRect();
-
-  const approachX =
-    bathBox.left -
-    roomBox.left -
-    35;
-
-  movePetTo(
-    approachX,
-    floorNearY(),
-    {
-      callback: () => {
-        clearCatStates();
-
-        const bathX =
-          bathBox.left -
-          roomBox.left +
-          bathBox.width / 2;
-
-        /*
-          Posisi khusus supaya kepala masuk
-          di dalam bak, bukan turun keluar frame.
-        */
-        const bathTop =
-          bathBox.top -
-          roomBox.top -
-          45;
-
-        petZone.style.transition =
-          "left .3s ease, top .3s ease";
-
-        petZone.style.left =
-          `${bathX}px`;
-
-        petZone.style.top =
-          `${bathTop}px`;
-
-        petZone.style.bottom =
-          "auto";
-
-        petZone.classList.add("in-bath");
-
-        cat.classList.add("bathing");
-
-        bath.classList.add("active");
-
-        say("splash!", 3000);
-
-        showEffect("○");
-
-        setTimeout(() => {
-          showEffect("○");
-        }, 700);
-
-        setTimeout(() => {
-          showEffect("✦");
-        }, 1400);
-
-        setTimeout(() => {
-          data.cleanliness = clamp(
-            data.cleanliness + 40,
-            0,
-            100
-          );
-
-          data.happiness = clamp(
-            data.happiness + 4,
-            0,
-            100
-          );
-
-          gainXP(8);
-
-          bath.classList.remove("active");
-
-          petZone.classList.remove("in-bath");
-
-          clearCatStates();
-
-          const exitX =
-            bathBox.left -
-            roomBox.left -
-            45;
-
-          setPetPosition(
-            exitX,
-            floorNearY()
-          );
-
-          say("fresh!");
-
-          updateUI();
-
-          busy = false;
-        }, 3200);
-      }
-    }
-  );
-});
-
-/* =========================
-   BALL DRAG
-========================= */
+/* BALL */
 
 ball.addEventListener(
   "pointerdown",
   event => {
-    if (
-      busy ||
-      ballAnimationId
-    ) {
-      return;
-    }
+    if (busy) return;
 
     ballDragging = true;
-
     ballPointerId =
       event.pointerId;
 
@@ -1272,15 +1112,6 @@ ball.addEventListener(
   releaseBall
 );
 
-ball.addEventListener(
-  "pointercancel",
-  releaseBall
-);
-
-/* =========================
-   BALL PHYSICS
-========================= */
-
 function throwBall() {
   busy = true;
 
@@ -1308,7 +1139,8 @@ function throwBall() {
     vy = -6;
   }
 
-  const gravity = 0.48;
+  const gravity =
+    .48;
 
   function physics() {
     const box =
@@ -1330,13 +1162,13 @@ function throwBall() {
     y += vy;
 
     vy += gravity;
-    vx *= 0.986;
+    vx *= .986;
 
     if (
       x <= minX ||
       x >= maxX
     ) {
-      vx *= -0.68;
+      vx *= -.68;
 
       x = clamp(
         x,
@@ -1348,13 +1180,8 @@ function throwBall() {
     if (y >= maxY) {
       y = maxY;
 
-      vy *= -0.5;
-      vx *= 0.89;
-    }
-
-    if (y <= minY) {
-      y = minY;
-      vy *= -0.65;
+      vy *= -.5;
+      vx *= .89;
     }
 
     ball.style.left =
@@ -1367,36 +1194,31 @@ function throwBall() {
       `rotate(${x * 2.8}deg)`;
 
     const stopped =
-      Math.abs(vx) < 0.28 &&
-      Math.abs(vy) < 0.6 &&
+      Math.abs(vx) < .28 &&
+      Math.abs(vy) < .6 &&
       y >= maxY - 2;
 
     if (!stopped) {
-      ballAnimationId =
-        requestAnimationFrame(
-          physics
-        );
+      requestAnimationFrame(
+        physics
+      );
     } else {
-      ballAnimationId = null;
-
-      chaseBall(x + 22);
+      chaseBall(
+        x + 22
+      );
     }
   }
 
   physics();
 }
 
-/* =========================
-   CHASE BALL
-========================= */
-
-function chaseBall(ballScreenX) {
-  const box =
+function chaseBall(screenX) {
+  const roomR =
     getRoomRect();
 
   const x =
-    ballScreenX -
-    box.left;
+    screenX -
+    roomR.left;
 
   say("BALL!!");
 
@@ -1427,15 +1249,6 @@ function chaseBall(ballScreenX) {
             100
           );
 
-        data.hunger =
-          clamp(
-            data.hunger - 3,
-            0,
-            100
-          );
-
-        gainXP(12);
-
         updateUI();
 
         setTimeout(() => {
@@ -1446,7 +1259,6 @@ function chaseBall(ballScreenX) {
           resetBall();
 
           busy = false;
-
         }, 800);
       }
     }
@@ -1454,44 +1266,12 @@ function chaseBall(ballScreenX) {
 }
 
 function resetBall() {
-  if (ballAnimationId) {
-    cancelAnimationFrame(
-      ballAnimationId
-    );
-
-    ballAnimationId = null;
-  }
-
   ball.style.position = "";
   ball.style.left = "";
   ball.style.top = "";
   ball.style.zIndex = "";
   ball.style.transform = "";
 }
-
-/* =========================
-   XP
-========================= */
-
-function gainXP(amount) {
-  data.xp += amount;
-
-  while (data.xp >= 100) {
-    data.xp -= 100;
-
-    data.level++;
-    data.coins += 50;
-
-    setTimeout(() => {
-      say("LEVEL UP!");
-      showEffect("★");
-    }, 200);
-  }
-}
-
-/* =========================
-   RENAME
-========================= */
 
 function renamePet() {
   const name =
@@ -1502,32 +1282,20 @@ function renamePet() {
 
   if (!name) return;
 
-  const clean =
+  data.name =
     name
       .trim()
       .substring(0, 12);
 
-  if (!clean) return;
-
-  data.name = clean;
-
   updateUI();
-
-  say("that's me!");
 }
-
-/* =========================
-   RESET
-========================= */
 
 function resetPet() {
   if (
     !confirm(
       "Reset all pet progress?"
     )
-  ) {
-    return;
-  }
+  ) return;
 
   data = {
     ...defaultData
@@ -1537,122 +1305,74 @@ function resetPet() {
 
   setPetPosition(
     room.clientWidth / 2,
-    floorNearY()
+    floorNearY() - 20
   );
 
   resetBall();
 
   updateUI();
-
-  say("new game!");
 }
-
-/* =========================
-   IDLE AI
-========================= */
 
 function scheduleIdleBehaviour() {
-  clearTimeout(idleTimer);
+  clearTimeout(
+    idleTimer
+  );
 
-  idleTimer = setTimeout(() => {
-    if (
-      busy ||
-      catDragging ||
-      ballDragging
-    ) {
+  idleTimer =
+    setTimeout(() => {
+      if (
+        busy ||
+        catDragging ||
+        ballDragging
+      ) {
+        scheduleIdleBehaviour();
+        return;
+      }
+
+      if (
+        Math.random() <
+        .6
+      ) {
+        const x =
+          room.clientWidth *
+          (
+            .18 +
+            Math.random() * .64
+          );
+
+        const y =
+          floorFarY() +
+          15 +
+          Math.random() *
+          (
+            floorNearY() -
+            floorFarY() -
+            25
+          );
+
+        movePetTo(
+          x,
+          y
+        );
+      } else {
+        say(
+          [
+            "meow~",
+            "mrrp",
+            "play?",
+            "human?"
+          ][
+            Math.floor(
+              Math.random() * 4
+            )
+          ]
+        );
+      }
+
       scheduleIdleBehaviour();
-      return;
-    }
 
-    if (data.hunger < 25) {
-      say("hungry...");
-      scheduleIdleBehaviour();
-      return;
-    }
-
-    if (data.energy < 20) {
-      cat.classList.add(
-        "sitting"
-      );
-
-      say("sleepy...");
-
-      setTimeout(() => {
-        cat.classList.remove(
-          "sitting"
-        );
-      }, 2200);
-
-      scheduleIdleBehaviour();
-
-      return;
-    }
-
-    const random =
-      Math.random();
-
-    if (random < 0.25) {
-      cat.classList.add(
-        "sitting"
-      );
-
-      say("mrrp");
-
-      setTimeout(() => {
-        cat.classList.remove(
-          "sitting"
-        );
-      }, 2000);
-    }
-
-    else if (random < 0.7) {
-      const x =
-        room.clientWidth *
-        (
-          0.16 +
-          Math.random() * 0.68
-        );
-
-      const y =
-        floorFarY() +
-        15 +
-        Math.random() *
-        (
-          floorNearY() -
-          floorFarY() -
-          25
-        );
-
-      movePetTo(x, y);
-    }
-
-    else {
-      const texts = [
-        "meow~",
-        "human?",
-        "pet me!",
-        "...",
-        "play?"
-      ];
-
-      say(
-        texts[
-          Math.floor(
-            Math.random() *
-            texts.length
-          )
-        ]
-      );
-    }
-
-    scheduleIdleBehaviour();
-
-  }, 6500 + Math.random() * 4500);
+    }, 7000 + Math.random() * 5000);
 }
-
-/* =========================
-   DECAY
-========================= */
 
 setInterval(() => {
   data.hunger =
@@ -1662,23 +1382,16 @@ setInterval(() => {
       100
     );
 
-  data.happiness =
-    clamp(
-      data.happiness - .55,
-      0,
-      100
-    );
-
   data.energy =
     clamp(
-      data.energy - .75,
+      data.energy - .7,
       0,
       100
     );
 
   data.cleanliness =
     clamp(
-      data.cleanliness - .45,
+      data.cleanliness - .4,
       0,
       100
     );
@@ -1687,16 +1400,12 @@ setInterval(() => {
 
 }, 60000);
 
-/* =========================
-   START
-========================= */
-
 updateUI();
 
 requestAnimationFrame(() => {
   setPetPosition(
     room.clientWidth / 2,
-    floorNearY() - 40
+    floorNearY() - 30
   );
 });
 
