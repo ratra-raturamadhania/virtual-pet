@@ -1,178 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no"
+  >
+
   <title>Pixel Pet</title>
-  <link rel="stylesheet" href="style.css" />
+
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="game-shell">
+<main class="game-shell">
 
-    <header class="topbar">
-      <div>
-        <span class="mini-label">PIXEL PET</span>
-        <h1 id="petName">Mochi</h1>
-      </div>
+  <header class="topbar">
 
-      <div class="hud">
-        <div>LV <span id="level">1</span></div>
-        <div>XP <span id="xp">0</span>/100</div>
-        <div>🪙 <span id="coins">100</span></div>
-      </div>
-    </header>
-
-    <section class="screen">
-
-      <div class="room" id="room">
-
-        <div class="window-pixel">
-          <div class="cloud cloud-1"></div>
-          <div class="cloud cloud-2"></div>
-        </div>
-
-        <div class="poster">
-          <span>★</span>
-        </div>
-
-        <div class="sunflower-pot">
-          <div class="flower flower-one">
-            <div class="petal p1"></div>
-            <div class="petal p2"></div>
-            <div class="petal p3"></div>
-            <div class="petal p4"></div>
-            <div class="petal p5"></div>
-            <div class="petal p6"></div>
-            <div class="flower-center"></div>
-            <div class="stem"></div>
-          </div>
-
-          <div class="flower flower-two">
-            <div class="petal p1"></div>
-            <div class="petal p2"></div>
-            <div class="petal p3"></div>
-            <div class="petal p4"></div>
-            <div class="petal p5"></div>
-            <div class="petal p6"></div>
-            <div class="flower-center"></div>
-            <div class="stem"></div>
-          </div>
-
-          <div class="pot"></div>
-        </div>
-
-        <div class="speech hidden" id="speech">
-          meow!
-        </div>
-
-        <div class="pet-zone" id="petZone">
-
-          <div class="pixel-cat orange" id="pixelCat">
-
-            <div class="tail"></div>
-
-            <div class="ear ear-left"></div>
-            <div class="ear ear-right"></div>
-
-            <div class="head">
-              <div class="patch patch-head"></div>
-              <div class="eye eye-left"></div>
-              <div class="eye eye-right"></div>
-              <div class="nose"></div>
-            </div>
-
-            <div class="body">
-              <div class="patch patch-body"></div>
-            </div>
-
-            <div class="leg leg-left"></div>
-            <div class="leg leg-right"></div>
-
-          </div>
-
-          <div class="floating-effect" id="floatingEffect"></div>
-
-        </div>
-
-        <div class="bed object" id="bed">
-          <div class="bed-pillow"></div>
-          <div class="bed-base"></div>
-          <span>BED</span>
-        </div>
-
-        <div class="food-bowl object" id="foodBowl">
-          <div class="bowl-food"></div>
-          <div class="bowl"></div>
-          <span>FOOD</span>
-        </div>
-
-        <div class="throw-ball object" id="ball">
-          <div class="ball-body" id="ballBody"></div>
-          <span>DRAG BALL</span>
-        </div>
-
-        <div class="bath object" id="bath">
-          <div class="bath-top"></div>
-          <div class="bath-body"></div>
-          <span>BATH</span>
-        </div>
-
-        <div class="floor-line"></div>
-
-      </div>
-
-      <div class="stats">
-
-        <div class="stat">
-          <span>HUNGER</span>
-          <div class="meter"><div id="hungerBar"></div></div>
-          <b id="hungerText">80</b>
-        </div>
-
-        <div class="stat">
-          <span>HAPPY</span>
-          <div class="meter"><div id="happyBar"></div></div>
-          <b id="happyText">80</b>
-        </div>
-
-        <div class="stat">
-          <span>ENERGY</span>
-          <div class="meter"><div id="energyBar"></div></div>
-          <b id="energyText">80</b>
-        </div>
-
-        <div class="stat">
-          <span>CLEAN</span>
-          <div class="meter"><div id="cleanBar"></div></div>
-          <b id="cleanText">80</b>
-        </div>
-
-      </div>
-
-    </section>
-
-    <section class="customizer">
-      <span>CAT STYLE</span>
-
-      <button data-pattern="orange">ORANGE</button>
-      <button data-pattern="tuxedo">TUXEDO</button>
-      <button data-pattern="calico">CALICO</button>
-      <button data-pattern="gray">GRAY</button>
-    </section>
-
-    <div class="controls">
-      <button onclick="renamePet()">RENAME</button>
-      <button onclick="resetPet()">RESET</button>
+    <div>
+      <span class="mini-label">PIXEL PET</span>
+      <h1 id="petName">Mochi</h1>
     </div>
 
-    <p class="hint">
-      drag the cat • drag and throw the ball • tap objects • works on mobile too
-    </p>
+    <div class="hud">
 
-  </main>
+      <div>
+        LV <span id="level">1</span>
+      </div>
 
-  <script src="script.js"></script>
+      <div>
+        XP <span id="xp">0</span>/100
+      </div>
+
+      <div>
+        🪙 <span id="coins">100</span>
+      </div>
+
+    </div>
+
+  </header>
+
+  <section class="screen">
+
+    <div class="room" id="room">
+
+      <!-- WINDOW -->
+
+      <div class="window-pixel">
+        <div class="cloud cloud-one"></div>
+        <div class="cloud cloud-two"></div>
+      </div>
+
+
+      <!-- SUNFLOWERS -->
+
+      <div class="sunflowers">
+
+        <div class="sunflower flower-one">
+          <div class="petal petal-1"></div>
+          <div class="petal petal-2"></div>
+          <div class="petal petal-3"></div>
+          <div class="petal petal-4"></div>
+          <div class="petal petal-5"></div>
+          <div class="petal petal-6"></div>
+
+          <div class="flower-center"></div>
+          <div class="flower-stem"></div>
+        </div>
+
+
+        <div class="sunflower flower-two">
+          <div class="petal petal-1"></div>
+          <div class="petal petal-2"></div>
+          <div class="petal petal-3"></div>
+          <div class="petal petal-4"></div>
+          <div class="petal petal-5"></div>
+          <div class="petal petal-6"></div>
+
+          <div class="flower-center"></div>
+          <div class="flower-stem"></div>
+        </div>
+
+        <div class="flower-pot"></div>
+
+      </div>
+
+
+      <!-- POSTER -->
+
+      <div class="poster">
+        ★
+      </div>
+
+
+      <!-- SPEECH -->
+
+      <div id="speech" class="speech hidden">
+        meow!
+      </div>
+
+
+      <!-- PET -->
+
+      <div class="pet-zone" id="petZone">
+
+        <div class="pet-shadow" id="petShadow"></div>
+
+        <div
+          class="pixel-cat orange"
+          id="pixelCat"
+        >
+
+          <div class="tail"></div>
+
+          <div class="ear ear-left"></div>
+          <div class="ear ear-right"></div>
+
+          <div class="head">
+
+            <div class="patch patch-head"></div>
+
+            <div class="eye eye-left"></div>
+            <div class="eye eye-right"></div>
+
+            <div class="nose"></div>
+            <div class="mouth"></div>
+
+          </div>
+
+          <div class="body">
+            <div class="patch patch-body"></div>
+          </div>
+
+          <div class="leg leg-left"></div>
+          <div class="leg leg-right"></div>
+
+        </div>
+
+
+        <div
+          class="floating-effect"
+          id="floatingEffect"
+        ></div>
+
+      </div>
+
+
+      <!-- BED -->
+
+      <div
+        class="object bed"
+        id="bed"
+      >
+
+        <div class="bed-pillow"></div>
+        <div class="bed-base"></div>
+
+        <span>BED</span>
+
+      </div>
+
+
+      <!-- FOOD -->
+
+      <div
+        class="object food-bowl"
+        id="foodBowl"
+      >
+
+        <div
+          class="bowl-food"
+          id="bowlFood"
+        ></div>
+
+        <div class="bowl"></div>
+
+        <span>FOOD</span>
+
+      </div>
+
+
+      <!-- BALL -->
+
+      <div
+        class="object ball-home"
+        id="ballHome"
+      >
+
+        <div
+          class="ball"
+          id="ball"
+        ></div>
+
+        <span>THROW</span>
+
+      </div>
+
+
+      <!-- BATH -->
+
+      <div
+        class="object bath"
+        id="bath"
+      >
+
+        <div class="bath-bubbles">
+          <i></i>
+          <i></i>
+          <i></i>
+        </div>
+
+        <div class="bath-rim"></div>
+        <div class="bath-body"></div>
+
+        <span>BATH</span>
+
+      </div>
+
+
+      <div class="floor-line"></div>
+
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+      <div class="stat">
+        <span>HUNGER</span>
+
+        <div class="meter">
+          <div id="hungerBar"></div>
+        </div>
+
+        <b id="hungerText">80</b>
+      </div>
+
+
+      <div class="stat">
+        <span>HAPPY</span>
+
+        <div class="meter">
+          <div id="happyBar"></div>
+        </div>
+
+        <b id="happyText">80</b>
+      </div>
+
+
+      <div class="stat">
+        <span>ENERGY</span>
+
+        <div class="meter">
+          <div id="energyBar"></div>
+        </div>
+
+        <b id="energyText">80</b>
+      </div>
+
+
+      <div class="stat">
+        <span>CLEAN</span>
+
+        <div class="meter">
+          <div id="cleanBar"></div>
+        </div>
+
+        <b id="cleanText">80</b>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CAT STYLE -->
+
+  <section class="customizer">
+
+    <span>CAT STYLE</span>
+
+    <button data-pattern="orange">
+      ORANGE
+    </button>
+
+    <button data-pattern="tuxedo">
+      TUXEDO
+    </button>
+
+    <button data-pattern="calico">
+      CALICO
+    </button>
+
+    <button data-pattern="gray">
+      GRAY
+    </button>
+
+  </section>
+
+
+  <div class="controls">
+
+    <button onclick="renamePet()">
+      RENAME
+    </button>
+
+    <button onclick="resetPet()">
+      RESET
+    </button>
+
+  </div>
+
+
+  <p class="hint">
+    drag Mochi • pet Mochi • throw the ball • tap food, bed or bath
+  </p>
+
+</main>
+
+<script src="script.js"></script>
+
 </body>
 </html>
