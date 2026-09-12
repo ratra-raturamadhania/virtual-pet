@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Pixel Pet</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -37,10 +37,30 @@
           <span>★</span>
         </div>
 
-        <div class="shelf">
-          <div class="book book-a"></div>
-          <div class="book book-b"></div>
-          <div class="plant">♣</div>
+        <div class="sunflower-pot">
+          <div class="flower flower-one">
+            <div class="petal p1"></div>
+            <div class="petal p2"></div>
+            <div class="petal p3"></div>
+            <div class="petal p4"></div>
+            <div class="petal p5"></div>
+            <div class="petal p6"></div>
+            <div class="flower-center"></div>
+            <div class="stem"></div>
+          </div>
+
+          <div class="flower flower-two">
+            <div class="petal p1"></div>
+            <div class="petal p2"></div>
+            <div class="petal p3"></div>
+            <div class="petal p4"></div>
+            <div class="petal p5"></div>
+            <div class="petal p6"></div>
+            <div class="flower-center"></div>
+            <div class="stem"></div>
+          </div>
+
+          <div class="pot"></div>
         </div>
 
         <div class="speech hidden" id="speech">
@@ -49,7 +69,7 @@
 
         <div class="pet-zone" id="petZone">
 
-          <div class="pixel-cat idle" id="pixelCat">
+          <div class="pixel-cat orange" id="pixelCat">
 
             <div class="tail"></div>
 
@@ -57,12 +77,15 @@
             <div class="ear ear-right"></div>
 
             <div class="head">
+              <div class="patch patch-head"></div>
               <div class="eye eye-left"></div>
               <div class="eye eye-right"></div>
               <div class="nose"></div>
             </div>
 
-            <div class="body"></div>
+            <div class="body">
+              <div class="patch patch-body"></div>
+            </div>
 
             <div class="leg leg-left"></div>
             <div class="leg leg-right"></div>
@@ -85,9 +108,9 @@
           <span>FOOD</span>
         </div>
 
-        <div class="ball object" id="ball">
-          <div class="ball-body"></div>
-          <span>PLAY</span>
+        <div class="throw-ball object" id="ball">
+          <div class="ball-body" id="ballBody"></div>
+          <span>DRAG BALL</span>
         </div>
 
         <div class="bath object" id="bath">
@@ -104,38 +127,39 @@
 
         <div class="stat">
           <span>HUNGER</span>
-          <div class="meter">
-            <div id="hungerBar"></div>
-          </div>
+          <div class="meter"><div id="hungerBar"></div></div>
           <b id="hungerText">80</b>
         </div>
 
         <div class="stat">
           <span>HAPPY</span>
-          <div class="meter">
-            <div id="happyBar"></div>
-          </div>
+          <div class="meter"><div id="happyBar"></div></div>
           <b id="happyText">80</b>
         </div>
 
         <div class="stat">
           <span>ENERGY</span>
-          <div class="meter">
-            <div id="energyBar"></div>
-          </div>
+          <div class="meter"><div id="energyBar"></div></div>
           <b id="energyText">80</b>
         </div>
 
         <div class="stat">
           <span>CLEAN</span>
-          <div class="meter">
-            <div id="cleanBar"></div>
-          </div>
+          <div class="meter"><div id="cleanBar"></div></div>
           <b id="cleanText">80</b>
         </div>
 
       </div>
 
+    </section>
+
+    <section class="customizer">
+      <span>CAT STYLE</span>
+
+      <button data-pattern="orange">ORANGE</button>
+      <button data-pattern="tuxedo">TUXEDO</button>
+      <button data-pattern="calico">CALICO</button>
+      <button data-pattern="gray">GRAY</button>
     </section>
 
     <div class="controls">
@@ -144,12 +168,11 @@
     </div>
 
     <p class="hint">
-      click anywhere on the floor to move • click the cat • click food, ball, bed, or bath
+      drag the cat • drag and throw the ball • tap objects • works on mobile too
     </p>
 
   </main>
 
   <script src="script.js"></script>
-
 </body>
 </html>
