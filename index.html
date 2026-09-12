@@ -1,134 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-
+  <meta charset="UTF-8" />
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=no"
-  >
-
+  />
   <title>Pixel Pet</title>
-
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
 <main class="game-shell">
 
-  <!-- HEADER -->
-
   <header class="topbar">
-
     <div>
       <span class="mini-label">PIXEL PET</span>
-      <h1 id="petName">Mochi</h1>
+      <h1 id="petName">Sucipto</h1>
     </div>
 
     <div class="hud">
-
-      <div>
-        LV <span id="level">1</span>
-      </div>
-
-      <div>
-        XP <span id="xp">0</span>/100
-      </div>
-
-      <div>
-        🪙 <span id="coins">100</span>
-      </div>
-
+      <div>LV <span id="level">1</span></div>
+      <div>XP <span id="xp">0</span>/100</div>
+      <div>🪙 <span id="coins">100</span></div>
     </div>
-
   </header>
-
-
-  <!-- GAME FRAME -->
 
   <section class="screen">
 
     <div class="room" id="room">
 
-      <!-- WALL BASE -->
-
-      <div class="wall-stripe"></div>
-
-
-      <!-- WINDOW -->
-
       <div class="window-pixel">
-
         <div class="cloud cloud-one"></div>
         <div class="cloud cloud-two"></div>
-
-        <div class="window-plant">
-          <div class="tiny-leaf leaf-one"></div>
-          <div class="tiny-leaf leaf-two"></div>
-          <div class="tiny-pot"></div>
-        </div>
-
       </div>
-
-
-      <!-- DYNAMIC PHOTO FRAME -->
-
-      <div class="photo-frame">
-
-        <div class="photo-inner">
-
-          <!-- OWNER SILHOUETTE -->
-
-          <div class="owner-shadow">
-
-            <div class="owner-hair"></div>
-            <div class="owner-head"></div>
-            <div class="owner-body"></div>
-
-          </div>
-
-
-          <!-- MINI CAT IN PHOTO -->
-
-          <div
-            class="portrait-cat orange"
-            id="portraitCat"
-          >
-
-            <div class="portrait-ear portrait-ear-left"></div>
-            <div class="portrait-ear portrait-ear-right"></div>
-
-            <div class="portrait-head">
-
-              <div class="portrait-patch portrait-patch-head"></div>
-
-              <div class="portrait-eye portrait-eye-left"></div>
-              <div class="portrait-eye portrait-eye-right"></div>
-
-              <div class="portrait-nose"></div>
-
-            </div>
-
-            <div class="portrait-body">
-              <div class="portrait-patch portrait-patch-body"></div>
-            </div>
-
-          </div>
-
-          <div class="photo-heart">
-            ♥
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- SUNFLOWERS -->
 
       <div class="sunflower-corner">
-
         <div class="sunflower sf-one">
           <div class="sf-petal sf-p1"></div>
           <div class="sf-petal sf-p2"></div>
@@ -136,11 +44,9 @@
           <div class="sf-petal sf-p4"></div>
           <div class="sf-petal sf-p5"></div>
           <div class="sf-petal sf-p6"></div>
-
           <div class="sf-center"></div>
           <div class="sf-stem"></div>
         </div>
-
 
         <div class="sunflower sf-two">
           <div class="sf-petal sf-p1"></div>
@@ -149,138 +55,100 @@
           <div class="sf-petal sf-p4"></div>
           <div class="sf-petal sf-p5"></div>
           <div class="sf-petal sf-p6"></div>
-
           <div class="sf-center"></div>
           <div class="sf-stem"></div>
         </div>
 
         <div class="sunflower-pot"></div>
-
       </div>
 
+      <div class="photo-frame">
+        <div class="photo-inner">
 
-      <!-- RUG -->
+          <div class="owner-shadow">
+            <div class="owner-hair"></div>
+            <div class="owner-head"></div>
+            <div class="owner-body"></div>
+          </div>
 
-      <div class="rug">
-        <div class="rug-pattern"></div>
+          <div class="portrait-cat orange" id="portraitCat">
+            <div class="portrait-ear portrait-ear-left"></div>
+            <div class="portrait-ear portrait-ear-right"></div>
+
+            <div class="portrait-head">
+              <div class="portrait-patch portrait-patch-head"></div>
+              <div class="portrait-eye portrait-eye-left"></div>
+              <div class="portrait-eye portrait-eye-right"></div>
+              <div class="portrait-nose"></div>
+            </div>
+
+            <div class="portrait-body">
+              <div class="portrait-patch portrait-patch-body"></div>
+            </div>
+          </div>
+
+          <div class="photo-heart">♥</div>
+        </div>
       </div>
 
+      <div class="rug"></div>
 
       <!-- BED -->
-
-      <div
-        class="bed furniture"
-        id="bed"
-        title="Sleep"
-      >
-
+      <div class="bed furniture" id="bed">
         <div class="bed-headboard"></div>
 
         <div class="bed-mattress">
-
           <div class="bed-pillow"></div>
           <div class="bed-blanket"></div>
-
         </div>
 
         <div class="bed-leg bed-leg-left"></div>
         <div class="bed-leg bed-leg-right"></div>
-
       </div>
 
-
-      <!-- FOOD CORNER -->
-
-      <div
-        class="food-corner furniture"
-        id="foodBowl"
-        title="Eat"
-      >
-
+      <!-- FOOD -->
+      <div class="food-corner furniture" id="foodBowl">
         <div class="food-mat"></div>
-
         <div class="bowl-food" id="bowlFood"></div>
-
         <div class="food-bowl-shape"></div>
-
       </div>
 
+      <!-- BALL -->
+      <div class="ball-start">
+        <div class="ball" id="ball"></div>
+      </div>
 
       <!-- BATH -->
-
-      <div
-        class="bath furniture"
-        id="bath"
-        title="Bath"
-      >
-
+      <div class="bath furniture" id="bath">
         <div class="bath-faucet"></div>
 
         <div class="bath-bubbles">
-
           <i></i>
           <i></i>
           <i></i>
           <i></i>
-
         </div>
 
         <div class="bath-rim"></div>
-
         <div class="bath-body"></div>
-
       </div>
-
-
-      <!-- BALL -->
-
-      <div class="ball-start" id="ballStart">
-
-        <div
-          class="ball"
-          id="ball"
-          title="Drag and throw!"
-        ></div>
-
-      </div>
-
 
       <!-- SPEECH -->
-
-      <div
-        id="speech"
-        class="speech hidden"
-      >
-        meow!
-      </div>
-
+      <div id="speech" class="speech hidden">meow!</div>
 
       <!-- PET -->
+      <div class="pet-zone" id="petZone">
 
-      <div
-        class="pet-zone"
-        id="petZone"
-      >
+        <div class="pet-shadow"></div>
 
-        <div
-          class="pet-shadow"
-          id="petShadow"
-        ></div>
-
-
-        <div
-          class="pixel-cat orange"
-          id="pixelCat"
-        >
+        <div class="pixel-cat orange" id="pixelCat">
 
           <div class="tail"></div>
 
           <div class="ear ear-left"></div>
           <div class="ear ear-right"></div>
 
-
           <div class="head">
-
             <div class="patch patch-head"></div>
 
             <div class="eye eye-left"></div>
@@ -288,138 +156,76 @@
 
             <div class="nose"></div>
             <div class="mouth"></div>
-
           </div>
-
 
           <div class="body">
             <div class="patch patch-body"></div>
           </div>
 
-
-          <div class="leg leg-left"></div>
-          <div class="leg leg-right"></div>
+          <!-- 4 LEGS -->
+          <div class="leg front-leg front-left"></div>
+          <div class="leg front-leg front-right"></div>
+          <div class="leg back-leg back-left"></div>
+          <div class="leg back-leg back-right"></div>
 
         </div>
 
-
-        <div
-          class="floating-effect"
-          id="floatingEffect"
-        ></div>
-
+        <div class="floating-effect" id="floatingEffect"></div>
       </div>
-
 
       <div class="floor-line"></div>
 
     </div>
 
-
-    <!-- STATS -->
-
     <div class="stats">
 
       <div class="stat">
-
         <span>HUNGER</span>
-
-        <div class="meter">
-          <div id="hungerBar"></div>
-        </div>
-
+        <div class="meter"><div id="hungerBar"></div></div>
         <b id="hungerText">80</b>
-
       </div>
 
-
       <div class="stat">
-
         <span>HAPPY</span>
-
-        <div class="meter">
-          <div id="happyBar"></div>
-        </div>
-
+        <div class="meter"><div id="happyBar"></div></div>
         <b id="happyText">80</b>
-
       </div>
 
-
       <div class="stat">
-
         <span>ENERGY</span>
-
-        <div class="meter">
-          <div id="energyBar"></div>
-        </div>
-
+        <div class="meter"><div id="energyBar"></div></div>
         <b id="energyText">80</b>
-
       </div>
 
-
       <div class="stat">
-
         <span>CLEAN</span>
-
-        <div class="meter">
-          <div id="cleanBar"></div>
-        </div>
-
+        <div class="meter"><div id="cleanBar"></div></div>
         <b id="cleanText">80</b>
-
       </div>
 
     </div>
 
   </section>
 
-
-  <!-- CAT CUSTOMIZER -->
-
   <section class="customizer">
-
     <span>CAT STYLE</span>
 
-    <button data-pattern="orange">
-      ORANGE
-    </button>
-
-    <button data-pattern="tuxedo">
-      TUXEDO
-    </button>
-
-    <button data-pattern="calico">
-      CALICO
-    </button>
-
-    <button data-pattern="gray">
-      GRAY
-    </button>
-
+    <button data-pattern="orange">ORANGE</button>
+    <button data-pattern="tuxedo">TUXEDO</button>
+    <button data-pattern="calico">CALICO</button>
+    <button data-pattern="gray">GRAY</button>
   </section>
 
-
   <div class="controls">
-
-    <button onclick="renamePet()">
-      RENAME
-    </button>
-
-    <button onclick="resetPet()">
-      RESET
-    </button>
-
+    <button onclick="renamePet()">RENAME</button>
+    <button onclick="resetPet()">RESET</button>
   </div>
-
 
   <p class="hint">
     pet • pick up • throw the ball • tap furniture
   </p>
 
 </main>
-
 
 <script src="script.js"></script>
 
