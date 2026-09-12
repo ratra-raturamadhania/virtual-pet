@@ -26,10 +26,9 @@
 
     <section class="screen">
 
-      <div class="room">
+      <div class="room" id="room">
 
         <div class="window-pixel">
-          <div class="sky"></div>
           <div class="cloud cloud-1"></div>
           <div class="cloud cloud-2"></div>
         </div>
@@ -49,7 +48,9 @@
         </div>
 
         <div class="pet-zone" id="petZone">
-          <div class="pixel-cat" id="pixelCat">
+
+          <div class="pixel-cat idle" id="pixelCat">
+
             <div class="tail"></div>
 
             <div class="ear ear-left"></div>
@@ -63,11 +64,13 @@
 
             <div class="body"></div>
 
-            <div class="paw paw-left"></div>
-            <div class="paw paw-right"></div>
+            <div class="leg leg-left"></div>
+            <div class="leg leg-right"></div>
+
           </div>
 
           <div class="floating-effect" id="floatingEffect"></div>
+
         </div>
 
         <div class="bed object" id="bed">
@@ -141,11 +144,12 @@
     </div>
 
     <p class="hint">
-      click the cat • click food, ball, bed, or bath
+      click anywhere on the floor to move • click the cat • click food, ball, bed, or bath
     </p>
 
   </main>
 
   <script src="script.js"></script>
+
 </body>
 </html>
