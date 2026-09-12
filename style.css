@@ -2833,3 +2833,169 @@ button.active-pattern {
       scale(1);
   }
 }
+/* =========================
+   FIX FURNITURE INTERACTIONS
+========================= */
+
+.pet-zone.on-bed {
+  z-index: 18 !important;
+}
+
+.pet-zone.at-food {
+  z-index: 25 !important;
+}
+
+.pet-zone.in-bath {
+  z-index: 30 !important;
+}
+
+/* bed harus di belakang pet saat tidur */
+.bed {
+  z-index: 12;
+}
+
+/* makanan jangan nutup muka */
+.food-corner {
+  z-index: 14;
+}
+
+/* bath rim berada di depan badan kucing,
+   tapi kepala tetap kelihatan */
+.bath {
+  z-index: 20;
+}
+
+.bath-rim {
+  z-index: 35;
+}
+
+.bath-body {
+  z-index: 22;
+}
+
+
+/* =========================
+   BETTER SLEEP POSE
+========================= */
+
+.pixel-cat.sleeping {
+  animation: sleepBreath 1.6s ease-in-out infinite alternate;
+  transform: none !important;
+}
+
+.pixel-cat.sleeping .head {
+  left: 5px;
+  top: 48px;
+
+  transform: rotate(-8deg);
+}
+
+.pixel-cat.sleeping .body {
+  left: 38px;
+  bottom: 12px;
+
+  width: 67px;
+  height: 46px;
+
+  border-radius: 25px 35px 25px 30px;
+
+  transform: rotate(2deg);
+}
+
+.pixel-cat.sleeping .ear-left {
+  left: 4px;
+  top: 40px;
+}
+
+.pixel-cat.sleeping .ear-right {
+  left: 25px;
+  right: auto;
+  top: 42px;
+}
+
+.pixel-cat.sleeping .eye {
+  height: 3px !important;
+  width: 11px;
+  top: 27px !important;
+}
+
+.pixel-cat.sleeping .leg {
+  display: none;
+}
+
+.pixel-cat.sleeping .tail {
+  width: 48px;
+
+  right: -4px;
+  bottom: 17px;
+
+  transform: rotate(8deg);
+
+  animation: none;
+}
+
+@keyframes sleepBreath {
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: 0 2px;
+  }
+}
+
+
+/* =========================
+   EATING POSE
+========================= */
+
+.pixel-cat.eating {
+  animation: none;
+}
+
+.pixel-cat.eating .head {
+  animation: eatMove .35s ease-in-out infinite alternate;
+}
+
+@keyframes eatMove {
+  from {
+    transform: translateY(8px) rotate(2deg);
+  }
+
+  to {
+    transform: translateY(17px) rotate(5deg);
+  }
+}
+
+
+/* =========================
+   BATH POSE
+========================= */
+
+.pixel-cat.bathing {
+  animation: bathBob .8s ease-in-out infinite alternate;
+}
+
+.pixel-cat.bathing .body,
+.pixel-cat.bathing .leg,
+.pixel-cat.bathing .tail {
+  opacity: 0;
+}
+
+.pixel-cat.bathing .head {
+  transform: translateY(35px);
+}
+
+.pixel-cat.bathing .ear {
+  transform-origin: center;
+}
+
+@keyframes bathBob {
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: 0 3px;
+  }
+}
