@@ -21,10 +21,11 @@ const defaultData = {
 
 
 /* =========================
-   LOAD + FIX OLD SAVE
+   LOAD SAVE
 ========================= */
 
 let savedData = null;
+
 
 try {
 
@@ -35,18 +36,11 @@ try {
       )
     );
 
-} catch (error) {
+} catch {
 
   savedData = null;
 }
 
-
-/*
-  Spread defaultData FIRST.
-
-  So old saves that don't have
-  "pattern" automatically get orange.
-*/
 
 let data = {
 
@@ -56,20 +50,26 @@ let data = {
 };
 
 
-/*
-  Extra safety:
-*/
+const validPatterns = [
+
+  "orange",
+
+  "tuxedo",
+
+  "calico",
+
+  "gray"
+];
+
 
 if (
-  ![
-    "orange",
-    "tuxedo",
-    "calico",
-    "gray"
-  ].includes(data.pattern)
+  !validPatterns.includes(
+    data.pattern
+  )
 ) {
 
-  data.pattern = "orange";
+  data.pattern =
+    "orange";
 }
 
 
@@ -78,33 +78,64 @@ if (
 ========================= */
 
 const room =
-  document.getElementById("room");
+  document.getElementById(
+    "room"
+  );
+
 
 const petZone =
-  document.getElementById("petZone");
+  document.getElementById(
+    "petZone"
+  );
+
 
 const cat =
-  document.getElementById("pixelCat");
+  document.getElementById(
+    "pixelCat"
+  );
 
-const shadow =
-  document.getElementById("petShadow");
+
+const portraitCat =
+  document.getElementById(
+    "portraitCat"
+  );
+
 
 const speech =
-  document.getElementById("speech");
+  document.getElementById(
+    "speech"
+  );
+
 
 const effect =
   document.getElementById(
     "floatingEffect"
   );
 
-const ball =
-  document.getElementById("ball");
 
-const ballHome =
-  document.getElementById("ballHome");
+const ball =
+  document.getElementById(
+    "ball"
+  );
+
 
 const bath =
-  document.getElementById("bath");
+  document.getElementById(
+    "bath"
+  );
+
+
+const bed =
+  document.getElementById(
+    "bed"
+  );
+
+
+const foodBowl =
+  document.getElementById(
+    "foodBowl"
+  );
+
 
 const bowlFood =
   document.getElementById(
@@ -118,22 +149,36 @@ const bowlFood =
 
 let busy = false;
 
-let catDragging = false;
 
-let dragMoved = false;
+let catDragging =
+  false;
+
+
+let dragMoved =
+  false;
+
 
 let catOffsetX = 0;
+
 let catOffsetY = 0;
 
-let ballDragging = false;
+
+let ballDragging =
+  false;
+
 
 let ballLastX = 0;
+
 let ballLastY = 0;
 
+
 let ballVX = 0;
+
 let ballVY = 0;
 
-let ballAnimationId = null;
+
+let ballAnimationId =
+  null;
 
 
 /* =========================
@@ -159,7 +204,10 @@ function clamp(value) {
 
   return Math.max(
     0,
-    Math.min(100, value)
+    Math.min(
+      100,
+      value
+    )
   );
 }
 
@@ -169,38 +217,26 @@ function clearCatStates() {
   cat.classList.remove(
 
     "carried",
+
     "drop-bounce",
+
     "walking",
+
     "running",
+
     "happy",
+
     "eating",
+
     "sleeping",
+
     "bathing"
   );
-}
 
 
-function setFaceDirection(targetX) {
-
-  const catRect =
-    petZone.getBoundingClientRect();
-
-  const catCenter =
-    catRect.left +
-    catRect.width / 2;
-
-  if (targetX < catCenter) {
-
-    cat.classList.add(
-      "face-left"
-    );
-
-  } else {
-
-    cat.classList.remove(
-      "face-left"
-    );
-  }
+  petZone.classList.remove(
+    "on-bed"
+  );
 }
 
 
@@ -215,15 +251,18 @@ function updateUI() {
   ).textContent =
     data.name;
 
+
   document.getElementById(
     "level"
   ).textContent =
     data.level;
 
+
   document.getElementById(
     "xp"
   ).textContent =
     data.xp;
+
 
   document.getElementById(
     "coins"
@@ -236,15 +275,18 @@ function updateUI() {
     data.hunger
   );
 
+
   setStat(
     "happy",
     data.happiness
   );
 
+
   setStat(
     "energy",
     data.energy
   );
+
 
   setStat(
     "clean",
@@ -256,7 +298,9 @@ function updateUI() {
     data.pattern
   );
 
+
   updateMood();
+
 
   save();
 }
@@ -272,6 +316,7 @@ function setStat(
       name + "Bar"
     );
 
+
   const text =
     document.getElementById(
       name + "Text"
@@ -281,6 +326,7 @@ function setStat(
   bar.style.width =
     value + "%";
 
+
   text.textContent =
     Math.round(value);
 
@@ -288,14 +334,20 @@ function setStat(
   if (value < 25) {
 
     bar.style.background =
-      "#c95f59";
+      "#ca5f59";
 
-  } else if (value < 50) {
+  }
+
+  else if (
+    value < 50
+  ) {
 
     bar.style.background =
-      "#d7a14f";
+      "#d7a04f";
 
-  } else {
+  }
+
+  else {
 
     bar.style.background =
       "#77a870";
@@ -304,7 +356,7 @@ function setStat(
 
 
 /* =========================
-   MOOD FACE
+   FACE
 ========================= */
 
 function updateMood() {
@@ -314,44 +366,60 @@ function updateMood() {
       ".eye"
     );
 
+
   const mouth =
     document.querySelector(
       ".mouth"
     );
 
 
-  eyes.forEach(eye => {
+  eyes.forEach(
+    eye => {
 
-    eye.style.height = "8px";
+      eye.style.height =
+        "8px";
 
-    eye.style.top = "24px";
-  });
+      eye.style.top =
+        "24px";
 
+    }
+  );
 
-  mouth.style.width = "12px";
 
   mouth.style.borderBottom =
     "3px solid #4c302d";
 
 
-  if (data.energy < 20) {
+  mouth.style.borderTop =
+    "0";
 
-    eyes.forEach(eye => {
 
-      eye.style.height = "3px";
+  if (
+    data.energy < 20
+  ) {
 
-      eye.style.top = "28px";
-    });
+    eyes.forEach(
+      eye => {
+
+        eye.style.height =
+          "3px";
+
+        eye.style.top =
+          "28px";
+
+      }
+    );
   }
 
 
   if (
-    data.happiness < 25 ||
-    data.hunger < 15
+    data.hunger < 15 ||
+    data.happiness < 25
   ) {
 
     mouth.style.borderBottom =
       "0";
+
 
     mouth.style.borderTop =
       "3px solid #4c302d";
@@ -365,10 +433,12 @@ function updateMood() {
 
 function say(
   text,
-  duration = 1600
+  duration = 1500
 ) {
 
-  speech.textContent = text;
+  speech.textContent =
+    text;
+
 
   speech.classList.remove(
     "hidden"
@@ -376,28 +446,35 @@ function say(
 
 
   clearTimeout(
-    window.petSpeechTimer
+    window.speechTimer
   );
 
 
-  window.petSpeechTimer =
-    setTimeout(() => {
+  window.speechTimer =
+    setTimeout(
+      () => {
 
-      speech.classList.add(
-        "hidden"
-      );
+        speech.classList.add(
+          "hidden"
+        );
 
-    }, duration);
+      },
+
+      duration
+    );
 }
 
 
 /* =========================
-   FLOATING EFFECT
+   EFFECT
 ========================= */
 
-function showEffect(symbol) {
+function showEffect(
+  symbol
+) {
 
-  effect.textContent = symbol;
+  effect.textContent =
+    symbol;
 
 
   effect.animate(
@@ -405,63 +482,85 @@ function showEffect(symbol) {
     [
 
       {
+
         opacity: 0,
 
         transform:
-          "translate(-50%, 10px) scale(.6)"
+          "translate(-50%, 8px) scale(.7)"
       },
 
       {
+
         opacity: 1,
 
         transform:
-          "translate(-50%, -10px) scale(1)"
+          "translate(-50%, -15px) scale(1)"
       },
 
       {
+
         opacity: 0,
 
         transform:
-          "translate(-50%, -60px) scale(1.2)"
+          "translate(-50%, -65px) scale(1.2)"
       }
 
     ],
 
     {
+
       duration: 950,
 
-      easing: "ease-out"
+      easing:
+        "cubic-bezier(.22,.8,.3,1)"
     }
   );
 
 
-  setTimeout(() => {
+  setTimeout(
+    () => {
 
-    effect.textContent = "";
+      effect.textContent =
+        "";
 
-  }, 950);
+    },
+
+    950
+  );
 }
 
 
 /* =========================
-   PATTERNS
+   CAT PATTERNS
 ========================= */
 
 function applyPattern(
   pattern
 ) {
 
-  cat.classList.remove(
+  validPatterns.forEach(
+    name => {
 
-    "orange",
-    "tuxedo",
-    "calico",
-    "gray"
+      cat.classList.remove(
+        name
+      );
+
+
+      portraitCat.classList.remove(
+        name
+      );
+
+    }
   );
 
 
   cat.classList.add(
-    pattern || "orange"
+    pattern
+  );
+
+
+  portraitCat.classList.add(
+    pattern
   );
 
 
@@ -469,17 +568,19 @@ function applyPattern(
     .querySelectorAll(
       "[data-pattern]"
     )
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.classList.toggle(
+        button.classList.toggle(
 
-        "active-pattern",
+          "active-pattern",
 
-        button.dataset.pattern ===
-        pattern
-      );
+          button.dataset.pattern ===
+          pattern
+        );
 
-    });
+      }
+    );
 }
 
 
@@ -487,38 +588,123 @@ document
   .querySelectorAll(
     "[data-pattern]"
   )
-  .forEach(button => {
+  .forEach(
+    button => {
 
-    button.addEventListener(
-      "click",
-      () => {
+      button.addEventListener(
+        "click",
 
-        data.pattern =
-          button.dataset.pattern;
+        () => {
 
-        applyPattern(
-          data.pattern
-        );
+          data.pattern =
+            button.dataset.pattern;
 
-        save();
 
-        say("new look!");
+          applyPattern(
+            data.pattern
+          );
 
-        showEffect("★");
-      }
-    );
 
-  });
+          say(
+            "new outfit!"
+          );
+
+
+          showEffect("♥");
+
+
+          save();
+        }
+      );
+
+    }
+  );
 
 
 /* =========================
-   WALK
+   OBJECT POSITION HELPER
 ========================= */
 
-function walkToPercent(
+function getObjectPercent(
+  element
+) {
+
+  const roomRect =
+    room.getBoundingClientRect();
+
+
+  const objectRect =
+    element.getBoundingClientRect();
+
+
+  const center =
+    objectRect.left +
+    objectRect.width / 2;
+
+
+  return (
+    (
+      center -
+      roomRect.left
+    )
+    /
+    roomRect.width
+  ) * 100;
+}
+
+
+/* =========================
+   FACE DIRECTION
+========================= */
+
+function faceTowards(
+  screenX
+) {
+
+  const rect =
+    petZone.getBoundingClientRect();
+
+
+  const catX =
+    rect.left +
+    rect.width / 2;
+
+
+  /*
+    We don't flip the whole pet-zone
+    because that would also flip effects.
+  */
+
+  if (
+    screenX < catX
+  ) {
+
+    cat.style.scale =
+      "-1 1";
+
+  }
+
+  else {
+
+    cat.style.scale =
+      "1 1";
+  }
+}
+
+
+/* =========================
+   WALK / RUN
+========================= */
+
+function movePetTo(
+
   percent,
-  running = false,
-  callback = null
+
+  {
+    run = false,
+    callback = null
+  } = {}
+
 ) {
 
   clearCatStates();
@@ -528,114 +714,119 @@ function walkToPercent(
     room.getBoundingClientRect();
 
 
-  const currentRect =
-    petZone.getBoundingClientRect();
-
-
-  const currentCenter =
-    currentRect.left +
-    currentRect.width / 2;
-
-
-  const targetX =
+  const destinationX =
     roomRect.left +
     roomRect.width *
     percent / 100;
 
 
-  setFaceDirection(
-    targetX
+  faceTowards(
+    destinationX
   );
 
 
   cat.classList.add(
-    running
+
+    run
       ? "running"
       : "walking"
+
   );
 
 
-  petZone.style.top = "";
+  petZone.style.top =
+    "";
+
 
   petZone.style.bottom =
-    "79px";
+    "65px";
 
-
-  /*
-    Faster when chasing.
-  */
 
   petZone.style.transition =
-    running
-      ? "left .38s linear"
-      : "left .65s linear";
+    run
+
+      ? "left .35s cubic-bezier(.2,.8,.25,1)"
+
+      : "left .55s cubic-bezier(.22,.8,.28,1)";
 
 
   petZone.style.left =
     percent + "%";
 
 
+  const current =
+    petZone.getBoundingClientRect();
+
+
   const distance =
     Math.abs(
-      targetX -
-      currentCenter
+      destinationX -
+      (
+        current.left +
+        current.width / 2
+      )
     );
 
 
   const duration =
-    running
+    run
+
       ? Math.max(
-          250,
+          280,
           Math.min(
-            700,
-            distance * 1.4
+            600,
+            distance * 1.2
           )
         )
 
       : Math.max(
           350,
           Math.min(
-            900,
-            distance * 2
+            800,
+            distance * 1.7
           )
         );
 
 
-  setTimeout(() => {
+  setTimeout(
+    () => {
 
-    cat.classList.remove(
-      "running",
-      "walking"
-    );
-
-
-    petZone.style.transition =
-      "left .65s linear";
+      cat.classList.remove(
+        "walking",
+        "running"
+      );
 
 
-    if (callback) {
+      if (callback) {
 
-      callback();
-    }
+        callback();
+      }
 
-  }, duration);
+    },
+
+    duration
+  );
 }
 
 
 /* =========================
-   CAT DRAG / PICK UP
+   PICK UP CAT
 ========================= */
 
 cat.addEventListener(
   "pointerdown",
+
   event => {
 
     if (busy) return;
 
 
-    catDragging = true;
+    catDragging =
+      true;
 
-    dragMoved = false;
+
+    dragMoved =
+      false;
 
 
     cat.setPointerCapture(
@@ -643,18 +834,18 @@ cat.addEventListener(
     );
 
 
-    const petRect =
+    const rect =
       petZone.getBoundingClientRect();
 
 
     catOffsetX =
       event.clientX -
-      petRect.left;
+      rect.left;
 
 
     catOffsetY =
       event.clientY -
-      petRect.top;
+      rect.top;
 
 
     clearCatStates();
@@ -677,12 +868,16 @@ cat.addEventListener(
 
 cat.addEventListener(
   "pointermove",
+
   event => {
 
-    if (!catDragging) return;
+    if (
+      !catDragging
+    ) return;
 
 
-    dragMoved = true;
+    dragMoved =
+      true;
 
 
     const roomRect =
@@ -714,7 +909,7 @@ cat.addEventListener(
     y = Math.max(
       5,
       Math.min(
-        roomRect.height - 130,
+        roomRect.height - 125,
         y
       )
     );
@@ -738,14 +933,17 @@ cat.addEventListener(
 );
 
 
-function finishCatDrag(
+function stopCatDrag(
   event
 ) {
 
-  if (!catDragging) return;
+  if (
+    !catDragging
+  ) return;
 
 
-  catDragging = false;
+  catDragging =
+    false;
 
 
   try {
@@ -754,7 +952,7 @@ function finishCatDrag(
       event.pointerId
     );
 
-  } catch (error) {}
+  } catch {}
 
 
   cat.classList.remove(
@@ -768,7 +966,7 @@ function finishCatDrag(
 
 
   petZone.style.transition =
-    "left .65s linear";
+    "left .52s cubic-bezier(.22,.8,.28,1)";
 
 
   cat.classList.add(
@@ -776,21 +974,22 @@ function finishCatDrag(
   );
 
 
-  setTimeout(() => {
+  setTimeout(
+    () => {
 
-    cat.classList.remove(
-      "drop-bounce"
-    );
+      cat.classList.remove(
+        "drop-bounce"
+      );
 
-  }, 380);
+    },
+
+    400
+  );
 
 
-  /*
-    If user only tapped,
-    treat it as petting.
-  */
-
-  if (!dragMoved) {
+  if (
+    !dragMoved
+  ) {
 
     data.happiness =
       clamp(
@@ -803,21 +1002,26 @@ function finishCatDrag(
     );
 
 
-    showEffect("♥");
+    say("prrrrr");
 
-    say("prrrr");
+
+    showEffect("♥");
 
 
     gainXP(3);
 
 
-    setTimeout(() => {
+    setTimeout(
+      () => {
 
-      cat.classList.remove(
-        "happy"
-      );
+        cat.classList.remove(
+          "happy"
+        );
 
-    }, 1400);
+      },
+
+      1400
+    );
 
 
     updateUI();
@@ -827,13 +1031,13 @@ function finishCatDrag(
 
 cat.addEventListener(
   "pointerup",
-  finishCatDrag
+  stopCatDrag
 );
 
 
 cat.addEventListener(
   "pointercancel",
-  finishCatDrag
+  stopCatDrag
 );
 
 
@@ -841,34 +1045,34 @@ cat.addEventListener(
    FOOD
 ========================= */
 
-document
-  .getElementById(
-    "foodBowl"
-  )
-  .addEventListener(
-    "click",
-    event => {
+foodBowl.addEventListener(
+  "click",
 
-      event.stopPropagation();
+  event => {
+
+    event.stopPropagation();
 
 
-      if (
-        busy ||
-        catDragging
-      ) return;
+    if (busy) return;
 
 
-      busy = true;
+    busy =
+      true;
 
 
-      bowlFood.style.opacity =
-        "1";
+    const position =
+      getObjectPercent(
+        foodBowl
+      );
 
 
-      walkToPercent(
-        30,
-        false,
-        () => {
+    movePetTo(
+
+      position,
+
+      {
+
+        callback: () => {
 
           clearCatStates();
 
@@ -879,208 +1083,117 @@ document
 
 
           say(
-            "nom nom nom",
-            2200
+            "nom nom...",
+            2300
           );
 
 
-          let bites = 0;
+          let bite = 0;
 
 
-          const biteTimer =
-            setInterval(() => {
+          const interval =
+            setInterval(
+              () => {
 
-              bites++;
-
-              bowlFood.style.transform =
-                bites % 2
-                  ? "scale(.8)"
-                  : "scale(1)";
-
-
-              showEffect("♪");
-
-
-              if (
-                bites >= 4
-              ) {
-
-                clearInterval(
-                  biteTimer
-                );
-
-
-                bowlFood.style.opacity =
-                  ".25";
+                bite++;
 
 
                 bowlFood.style.transform =
-                  "";
+
+                  bite % 2
+
+                    ? "scale(.72)"
+
+                    : "scale(1)";
 
 
-                data.hunger =
-                  clamp(
-                    data.hunger + 30
+                showEffect("♪");
+
+
+                if (
+                  bite === 4
+                ) {
+
+                  clearInterval(
+                    interval
                   );
 
-
-                data.happiness =
-                  clamp(
-                    data.happiness + 4
-                  );
-
-
-                gainXP(10);
-
-
-                clearCatStates();
-
-
-                updateUI();
-
-
-                setTimeout(() => {
 
                   bowlFood.style.opacity =
-                    "1";
+                    ".22";
 
 
-                  walkToPercent(
-                    50,
-                    false,
+                  bowlFood.style.transform =
+                    "";
+
+
+                  data.hunger =
+                    clamp(
+                      data.hunger + 30
+                    );
+
+
+                  data.happiness =
+                    clamp(
+                      data.happiness + 4
+                    );
+
+
+                  gainXP(10);
+
+
+                  clearCatStates();
+
+
+                  updateUI();
+
+
+                  setTimeout(
                     () => {
 
-                      busy = false;
-                    }
+                      bowlFood.style.opacity =
+                        "1";
+
+
+                      movePetTo(
+                        50,
+                        {
+                          callback: () => {
+
+                            busy =
+                              false;
+                          }
+                        }
+                      );
+
+                    },
+
+                    500
                   );
+                }
 
-                }, 500);
-              }
+              },
 
-            }, 420);
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================
-   BED / REAL SLEEP POSE
-========================= */
-
-document
-  .getElementById(
-    "bed"
-  )
-  .addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-
-
-      if (busy) return;
-
-
-      busy = true;
-
-
-      walkToPercent(
-        13,
-        false,
-        () => {
-
-          clearCatStates();
-
-
-          cat.classList.add(
-            "sleeping"
-          );
-
-
-          petZone.style.bottom =
-            "48px";
-
-
-          say(
-            "zzz...",
-            4200
-          );
-
-
-          showEffect("Z");
-
-
-          setTimeout(() => {
-
-            showEffect("z");
-
-          }, 1000);
-
-
-          setTimeout(() => {
-
-            showEffect("Z");
-
-          }, 2000);
-
-
-          setTimeout(() => {
-
-            data.energy =
-              clamp(
-                data.energy + 38
-              );
-
-
-            data.hunger =
-              clamp(
-                data.hunger - 7
-              );
-
-
-            gainXP(8);
-
-
-            clearCatStates();
-
-
-            petZone.style.bottom =
-              "79px";
-
-
-            say("good morning!");
-
-
-            updateUI();
-
-
-            walkToPercent(
-              50,
-              false,
-              () => {
-
-                busy = false;
-              }
+              420
             );
 
-          }, 4300);
-
         }
-      );
 
-    }
-  );
+      }
+
+    );
+
+  }
+);
 
 
 /* =========================
-   BATH
+   SLEEP EXACTLY ON BED
 ========================= */
 
-bath.addEventListener(
+bed.addEventListener(
   "click",
+
   event => {
 
     event.stopPropagation();
@@ -1089,101 +1202,178 @@ bath.addEventListener(
     if (busy) return;
 
 
-    busy = true;
+    busy =
+      true;
 
 
-    walkToPercent(
-      86,
-      false,
-      () => {
-
-        clearCatStates();
+    const position =
+      getObjectPercent(
+        bed
+      );
 
 
-        cat.classList.add(
-          "bathing"
-        );
+    movePetTo(
 
+      position,
 
-        bath.classList.add(
-          "active"
-        );
+      {
 
-
-        petZone.style.bottom =
-          "45px";
-
-
-        say(
-          "splash!",
-          3000
-        );
-
-
-        showEffect("✦");
-
-
-        setTimeout(() => {
-
-          showEffect("○");
-
-        }, 600);
-
-
-        setTimeout(() => {
-
-          showEffect("○");
-
-        }, 1300);
-
-
-        setTimeout(() => {
-
-          data.cleanliness =
-            clamp(
-              data.cleanliness + 40
-            );
-
-
-          data.happiness =
-            clamp(
-              data.happiness + 4
-            );
-
-
-          gainXP(8);
-
+        callback: () => {
 
           clearCatStates();
 
 
-          bath.classList.remove(
-            "active"
-          );
+          /*
+            Exact position on top of mattress.
+          */
+
+          const roomRect =
+            room.getBoundingClientRect();
+
+
+          const bedRect =
+            bed.getBoundingClientRect();
+
+
+          const sleepX =
+
+            (
+              (
+                bedRect.left +
+                bedRect.width * .57
+              )
+              -
+              roomRect.left
+            );
+
+
+          const sleepY =
+
+            (
+              bedRect.top -
+              roomRect.top +
+              3
+            );
+
+
+          petZone.style.transition =
+            "all .35s ease";
+
+
+          petZone.style.left =
+            sleepX + "px";
+
+
+          petZone.style.top =
+            sleepY + "px";
 
 
           petZone.style.bottom =
-            "79px";
+            "auto";
 
 
-          say("so clean!");
-
-
-          updateUI();
-
-
-          walkToPercent(
-            50,
-            false,
-            () => {
-
-              busy = false;
-            }
+          petZone.classList.add(
+            "on-bed"
           );
 
-        }, 3200);
+
+          cat.style.scale =
+            "1 1";
+
+
+          cat.classList.add(
+            "sleeping"
+          );
+
+
+          say(
+            "zzz...",
+            4800
+          );
+
+
+          showEffect("Z");
+
+
+          setTimeout(
+            () => {
+
+              showEffect("z");
+
+            },
+
+            1200
+          );
+
+
+          setTimeout(
+            () => {
+
+              showEffect("Z");
+
+            },
+
+            2500
+          );
+
+
+          setTimeout(
+            () => {
+
+              data.energy =
+                clamp(
+                  data.energy + 38
+                );
+
+
+              data.hunger =
+                clamp(
+                  data.hunger - 7
+                );
+
+
+              gainXP(8);
+
+
+              clearCatStates();
+
+
+              petZone.style.top =
+                "";
+
+
+              petZone.style.bottom =
+                "65px";
+
+
+              say(
+                "good morning!"
+              );
+
+
+              updateUI();
+
+
+              movePetTo(
+                50,
+                {
+                  callback: () => {
+
+                    busy =
+                      false;
+                  }
+                }
+              );
+
+            },
+
+            4800
+          );
+
+        }
 
       }
+
     );
 
   }
@@ -1191,20 +1381,170 @@ bath.addEventListener(
 
 
 /* =========================
-   BALL DRAG + THROW
+   BATH
+========================= */
+
+bath.addEventListener(
+  "click",
+
+  event => {
+
+    event.stopPropagation();
+
+
+    if (busy) return;
+
+
+    busy =
+      true;
+
+
+    const position =
+      getObjectPercent(
+        bath
+      );
+
+
+    movePetTo(
+
+      position,
+
+      {
+
+        callback: () => {
+
+          clearCatStates();
+
+
+          cat.classList.add(
+            "bathing"
+          );
+
+
+          bath.classList.add(
+            "active"
+          );
+
+
+          petZone.style.bottom =
+            "52px";
+
+
+          say(
+            "splash!",
+            3200
+          );
+
+
+          showEffect("○");
+
+
+          setTimeout(
+            () => {
+
+              showEffect("○");
+
+            },
+
+            750
+          );
+
+
+          setTimeout(
+            () => {
+
+              showEffect("✦");
+
+            },
+
+            1500
+          );
+
+
+          setTimeout(
+            () => {
+
+              data.cleanliness =
+                clamp(
+                  data.cleanliness + 40
+                );
+
+
+              data.happiness =
+                clamp(
+                  data.happiness + 4
+                );
+
+
+              gainXP(8);
+
+
+              bath.classList.remove(
+                "active"
+              );
+
+
+              clearCatStates();
+
+
+              petZone.style.bottom =
+                "65px";
+
+
+              say(
+                "fresh!"
+              );
+
+
+              updateUI();
+
+
+              movePetTo(
+                50,
+                {
+                  callback: () => {
+
+                    busy =
+                      false;
+                  }
+                }
+              );
+
+            },
+
+            3400
+          );
+
+        }
+
+      }
+
+    );
+
+  }
+);
+
+
+/* =========================
+   BALL PICKUP
 ========================= */
 
 ball.addEventListener(
   "pointerdown",
+
   event => {
 
     if (
       busy ||
       ballAnimationId
-    ) return;
+    ) {
+
+      return;
+    }
 
 
-    ballDragging = true;
+    ballDragging =
+      true;
 
 
     ball.setPointerCapture(
@@ -1215,11 +1555,13 @@ ball.addEventListener(
     ballLastX =
       event.clientX;
 
+
     ballLastY =
       event.clientY;
 
 
     ballVX = 0;
+
     ballVY = 0;
 
 
@@ -1234,25 +1576,28 @@ ball.addEventListener(
     ball.style.left =
       rect.left + "px";
 
+
     ball.style.top =
       rect.top + "px";
 
 
     ball.style.zIndex =
       "1000";
-
-
-    ball.style.margin =
-      "0";
   }
 );
 
 
 ball.addEventListener(
   "pointermove",
+
   event => {
 
-    if (!ballDragging) return;
+    if (
+      !ballDragging
+    ) {
+
+      return;
+    }
 
 
     ballVX =
@@ -1274,14 +1619,18 @@ ball.addEventListener(
 
 
     ball.style.left =
-      event.clientX -
-      24 +
+      (
+        event.clientX -
+        22
+      ) +
       "px";
 
 
     ball.style.top =
-      event.clientY -
-      24 +
+      (
+        event.clientY -
+        22
+      ) +
       "px";
   }
 );
@@ -1291,10 +1640,16 @@ function finishBallDrag(
   event
 ) {
 
-  if (!ballDragging) return;
+  if (
+    !ballDragging
+  ) {
+
+    return;
+  }
 
 
-  ballDragging = false;
+  ballDragging =
+    false;
 
 
   try {
@@ -1303,7 +1658,7 @@ function finishBallDrag(
       event.pointerId
     );
 
-  } catch (error) {}
+  } catch {}
 
 
   throwBall();
@@ -1328,7 +1683,8 @@ ball.addEventListener(
 
 function throwBall() {
 
-  busy = true;
+  busy =
+    true;
 
 
   let x =
@@ -1351,25 +1707,23 @@ function throwBall() {
     ballVY * 1.65;
 
 
-  /*
-    If user barely moved:
-    give it a small toss.
-  */
-
   if (
     Math.abs(vx) < 2 &&
     Math.abs(vy) < 2
   ) {
 
-    vx = 4;
+    vx = 5;
 
-    vy = -5;
+    vy = -6;
   }
 
 
-  const gravity = .45;
+  const gravity =
+    .42;
 
-  const friction = .985;
+
+  const friction =
+    .987;
 
 
   function physics() {
@@ -1383,7 +1737,7 @@ function throwBall() {
 
 
     const maxX =
-      roomRect.right - 53;
+      roomRect.right - 49;
 
 
     const minY =
@@ -1391,7 +1745,7 @@ function throwBall() {
 
 
     const maxY =
-      roomRect.bottom - 54;
+      roomRect.bottom - 49;
 
 
     x += vx;
@@ -1423,19 +1777,26 @@ function throwBall() {
     }
 
 
-    if (y >= maxY) {
+    if (
+      y >= maxY
+    ) {
 
       y = maxY;
 
-      vy *= -.57;
 
-      vx *= .91;
+      vy *= -.55;
+
+
+      vx *= .9;
     }
 
 
-    if (y <= minY) {
+    if (
+      y <= minY
+    ) {
 
       y = minY;
+
 
       vy *= -.65;
     }
@@ -1450,29 +1811,37 @@ function throwBall() {
 
 
     ball.style.transform =
-      `rotate(${x * 2}deg)`;
+      `rotate(${x * 3}deg)`;
 
 
     const stopped =
-      Math.abs(vx) < .28 &&
+
+      Math.abs(vx) < .3 &&
+
       Math.abs(vy) < .6 &&
+
       y >= maxY - 2;
 
 
-    if (!stopped) {
+    if (
+      !stopped
+    ) {
 
       ballAnimationId =
         requestAnimationFrame(
           physics
         );
 
-    } else {
+    }
 
-      ballAnimationId = null;
+    else {
+
+      ballAnimationId =
+        null;
 
 
       chaseBall(
-        x + 24
+        x + 22
       );
     }
   }
@@ -1483,7 +1852,7 @@ function throwBall() {
 
 
 /* =========================
-   CAT CHASE BALL
+   CHASE BALL
 ========================= */
 
 function chaseBall(
@@ -1499,13 +1868,18 @@ function chaseBall(
     roomRect.left;
 
 
-  const percent =
+  const percentage =
+
     Math.max(
-      11,
+      10,
+
       Math.min(
-        89,
-        localX /
-        roomRect.width *
+        90,
+
+        (
+          localX /
+          roomRect.width
+        ) *
         100
       )
     );
@@ -1514,61 +1888,71 @@ function chaseBall(
   say("BALL!!");
 
 
-  walkToPercent(
-    percent,
-    true,
-    () => {
+  movePetTo(
 
-      clearCatStates();
+    percentage,
 
+    {
 
-      cat.classList.add(
-        "happy"
-      );
+      run: true,
 
 
-      showEffect("★");
+      callback: () => {
 
-
-      data.happiness =
-        clamp(
-          data.happiness + 15
-        );
-
-
-      data.energy =
-        clamp(
-          data.energy - 8
-        );
-
-
-      data.hunger =
-        clamp(
-          data.hunger - 3
-        );
-
-
-      gainXP(12);
-
-
-      updateUI();
-
-
-      setTimeout(() => {
-
-        cat.classList.remove(
+        cat.classList.add(
           "happy"
         );
 
 
-        resetBall();
+        showEffect("★");
 
 
-        busy = false;
+        data.happiness =
+          clamp(
+            data.happiness + 15
+          );
 
-      }, 900);
+
+        data.energy =
+          clamp(
+            data.energy - 8
+          );
+
+
+        data.hunger =
+          clamp(
+            data.hunger - 3
+          );
+
+
+        gainXP(12);
+
+
+        updateUI();
+
+
+        setTimeout(
+          () => {
+
+            cat.classList.remove(
+              "happy"
+            );
+
+
+            resetBall();
+
+
+            busy =
+              false;
+
+          },
+
+          900
+        );
+      }
 
     }
+
   );
 }
 
@@ -1579,30 +1963,35 @@ function chaseBall(
 
 function resetBall() {
 
-  if (ballAnimationId) {
+  if (
+    ballAnimationId
+  ) {
 
     cancelAnimationFrame(
       ballAnimationId
     );
 
-    ballAnimationId = null;
+
+    ballAnimationId =
+      null;
   }
 
 
   ball.style.position =
     "";
 
+
   ball.style.left =
     "";
+
 
   ball.style.top =
     "";
 
+
   ball.style.zIndex =
     "";
 
-  ball.style.margin =
-    "";
 
   ball.style.transform =
     "";
@@ -1626,18 +2015,27 @@ function gainXP(
 
     data.xp -= 100;
 
+
     data.level++;
+
 
     data.coins += 50;
 
 
-    setTimeout(() => {
+    setTimeout(
+      () => {
 
-      say("LEVEL UP!");
+        say(
+          "LEVEL UP!"
+        );
 
-      showEffect("★");
 
-    }, 300);
+        showEffect("★");
+
+      },
+
+      300
+    );
   }
 }
 
@@ -1658,23 +2056,25 @@ function renamePet() {
   if (!name) return;
 
 
-  const cleanName =
+  const clean =
     name
       .trim()
-      .substring(0, 12);
+      .substring(0,12);
 
 
-  if (!cleanName) return;
+  if (!clean) return;
 
 
   data.name =
-    cleanName;
+    clean;
 
 
   updateUI();
 
 
-  say("that's me!");
+  say(
+    "that's me!"
+  );
 }
 
 
@@ -1684,16 +2084,17 @@ function renamePet() {
 
 function resetPet() {
 
-  const confirmation =
+  const ok =
     confirm(
       "Reset all pet progress?"
     );
 
 
-  if (!confirmation) return;
+  if (!ok) return;
 
 
   data = {
+
     ...defaultData
   };
 
@@ -1701,13 +2102,8 @@ function resetPet() {
   clearCatStates();
 
 
-  petZone.classList.remove(
-    "is-carried"
-  );
-
-
   petZone.style.left =
-    "50%";
+    "48%";
 
 
   petZone.style.top =
@@ -1715,7 +2111,11 @@ function resetPet() {
 
 
   petZone.style.bottom =
-    "79px";
+    "65px";
+
+
+  cat.style.scale =
+    "1 1";
 
 
   resetBall();
@@ -1724,15 +2124,17 @@ function resetPet() {
   updateUI();
 
 
-  say("new game!");
+  say(
+    "new game!"
+  );
 }
 
 
 /* =========================
-   RANDOM BEHAVIOUR
+   RANDOM PET BEHAVIOUR
 ========================= */
 
-const randomMessages = [
+const randomTexts = [
 
   "meow~",
 
@@ -1746,102 +2148,118 @@ const randomMessages = [
 
   "...",
 
-  "hello human"
+  "human?"
 ];
 
 
-setInterval(() => {
+setInterval(
+  () => {
 
-  if (
-    busy ||
-    catDragging ||
-    ballDragging
-  ) {
+    if (
+      busy ||
+      catDragging ||
+      ballDragging
+    ) {
 
-    return;
-  }
-
-
-  /*
-    Mood-specific requests
-  */
-
-  if (data.hunger < 25) {
-
-    say("hungry...");
-
-    return;
-  }
+      return;
+    }
 
 
-  if (data.energy < 20) {
+    if (
+      data.hunger < 25
+    ) {
 
-    say("sleepy...");
+      say(
+        "hungry..."
+      );
 
-    return;
-  }
-
-
-  if (data.cleanliness < 20) {
-
-    say("bath...?");
-
-    return;
-  }
+      return;
+    }
 
 
-  if (
-    Math.random() < .38
-  ) {
+    if (
+      data.energy < 20
+    ) {
 
-    const text =
-      randomMessages[
-        Math.floor(
-          Math.random() *
-          randomMessages.length
-        )
-      ];
+      say(
+        "sleepy..."
+      );
+
+      return;
+    }
 
 
-    say(text);
-  }
+    if (
+      data.cleanliness < 20
+    ) {
 
-}, 8500);
+      say(
+        "bath?"
+      );
+
+      return;
+    }
+
+
+    if (
+      Math.random() < .38
+    ) {
+
+      const text =
+        randomTexts[
+          Math.floor(
+            Math.random() *
+            randomTexts.length
+          )
+        ];
+
+
+      say(text);
+    }
+
+  },
+
+  8500
+);
 
 
 /* =========================
-   NATURAL DECAY
+   STAT DECAY
 ========================= */
 
-setInterval(() => {
+setInterval(
+  () => {
 
-  data.hunger =
-    clamp(
-      data.hunger - 1.5
-    );
-
-
-  data.happiness =
-    clamp(
-      data.happiness - .55
-    );
+    data.hunger =
+      clamp(
+        data.hunger - 1.5
+      );
 
 
-  data.energy =
-    clamp(
-      data.energy - .75
-    );
+    data.happiness =
+      clamp(
+        data.happiness - .55
+      );
 
 
-  data.cleanliness =
-    clamp(
-      data.cleanliness - .45
-    );
+    data.energy =
+      clamp(
+        data.energy - .75
+      );
 
 
-  updateUI();
+    data.cleanliness =
+      clamp(
+        data.cleanliness - .45
+      );
 
-}, 60000);
+
+    updateUI();
+
+  },
+
+  60000
+);
 
 
 /* =========================
