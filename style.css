@@ -2093,3 +2093,56 @@ h1 {
   transform:
     rotate(-16deg);
 }
+/* =========================================
+   FIX SLEEPING EARS
+========================================= */
+
+/* telinga ikut posisi kepala saat tidur */
+.pixel-cat.sleeping .ear-left {
+  left: 7px;
+  top: 48px;
+
+  transform:
+    rotate(35deg);
+
+  z-index: 7;
+}
+
+.pixel-cat.sleeping .ear-right {
+  left: 27px;
+  right: auto;
+  top: 45px;
+
+  transform:
+    rotate(55deg);
+
+  z-index: 7;
+}
+
+/* kepala sedikit lebih rendah dan masuk kasur */
+.pixel-cat.sleeping .head {
+  left: 5px;
+  top: 48px;
+
+  transform:
+    rotate(-8deg);
+
+  z-index: 8;
+}
+
+/* badan dibuat sedikit lebih masuk ke kasur */
+.pixel-cat.sleeping .body {
+  left: 38px;
+  bottom: 12px;
+
+  width: 67px;
+  height: 46px;
+
+  border-radius:
+    25px 35px 25px 30px;
+
+  transform:
+    rotate(2deg);
+
+  z-index: 6;
+}
