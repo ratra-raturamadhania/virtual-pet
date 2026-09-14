@@ -2146,3 +2146,298 @@ h1 {
 
   z-index: 6;
 }
+/* =========================================================
+   CAT PERSONALITY UPGRADE
+   visual only - tidak mengubah positioning utama
+========================================================= */
+
+/* ---------- EYES ---------- */
+
+.pixel-cat .eye {
+  transform-origin: center;
+}
+
+/* kedip random via class */
+.pixel-cat.blink .eye {
+  height: 3px !important;
+  top: 28px;
+}
+
+/* pupil lebih hidup */
+.pixel-cat .eye::after {
+  content: "";
+  position: absolute;
+
+  width: 2px;
+  height: 2px;
+
+  left: 2px;
+  top: 1px;
+
+  background: rgba(255,255,255,.75);
+}
+
+
+/* ---------- BLUSH ---------- */
+
+.pixel-cat .head::before,
+.pixel-cat .head::after {
+  content: "";
+
+  position: absolute;
+
+  width: 10px;
+  height: 4px;
+
+  top: 40px;
+
+  background: #d88b91;
+
+  opacity: 0;
+
+  transition: opacity .2s ease;
+}
+
+.pixel-cat .head::before {
+  left: 5px;
+}
+
+.pixel-cat .head::after {
+  right: 5px;
+}
+
+/* blush waktu happy / dielus */
+.pixel-cat.happy .head::before,
+.pixel-cat.happy .head::after {
+  opacity: .85;
+}
+
+
+/* ---------- EAR LIFE ---------- */
+
+.pixel-cat:not(.sleeping):not(.bathing) .ear-left {
+  transform-origin: bottom center;
+}
+
+.pixel-cat:not(.sleeping):not(.bathing) .ear-right {
+  transform-origin: bottom center;
+}
+
+.pixel-cat.ear-twitch .ear-left {
+  animation: earTwitchLeft .25s ease;
+}
+
+.pixel-cat.ear-twitch .ear-right {
+  animation: earTwitchRight .25s ease;
+}
+
+@keyframes earTwitchLeft {
+  0%,100% {
+    transform: rotate(45deg);
+  }
+
+  50% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes earTwitchRight {
+  0%,100% {
+    transform: rotate(45deg);
+  }
+
+  50% {
+    transform: rotate(58deg);
+  }
+}
+
+
+/* ---------- CURIOUS ---------- */
+
+.pixel-cat.curious .head {
+  animation: curiousHead .75s ease-in-out infinite alternate;
+}
+
+@keyframes curiousHead {
+  from {
+    transform: rotate(-3deg);
+  }
+
+  to {
+    transform: rotate(7deg);
+  }
+}
+
+
+/* ---------- SITTING ---------- */
+
+.pixel-cat.sitting {
+  animation: sittingBreath 1.4s ease-in-out infinite alternate;
+}
+
+.pixel-cat.sitting .body {
+  height: 62px;
+  width: 58px;
+
+  left: 22px;
+  bottom: 8px;
+
+  border-radius: 16px 16px 8px 8px;
+}
+
+.pixel-cat.sitting .head {
+  top: 2px;
+}
+
+.pixel-cat.sitting .leg {
+  height: 15px;
+  bottom: 0;
+}
+
+.pixel-cat.sitting .body::before,
+.pixel-cat.sitting .body::after {
+  height: 16px;
+  bottom: -12px;
+}
+
+.pixel-cat.sitting .tail {
+  right: -5px;
+  bottom: 8px;
+
+  width: 52px;
+
+  transform: rotate(5deg);
+
+  animation: sittingTail 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes sittingBreath {
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: 0 -2px;
+  }
+}
+
+@keyframes sittingTail {
+  from {
+    transform: rotate(2deg);
+  }
+
+  to {
+    transform: rotate(15deg);
+  }
+}
+
+
+/* ---------- HAPPY ---------- */
+
+.pixel-cat.happy .ear-left {
+  transform: rotate(35deg);
+}
+
+.pixel-cat.happy .ear-right {
+  transform: rotate(55deg);
+}
+
+.pixel-cat.happy .tail {
+  animation: happyTail .18s ease-in-out infinite alternate;
+}
+
+@keyframes happyTail {
+  from {
+    transform: rotate(-35deg);
+  }
+
+  to {
+    transform: rotate(30deg);
+  }
+}
+
+
+/* ---------- LOW ENERGY ---------- */
+
+.pixel-cat.sleepy-face .eye {
+  height: 4px;
+  top: 27px;
+}
+
+.pixel-cat.sleepy-face .tail {
+  transform: rotate(-28deg);
+}
+
+
+/* ---------- HUNGRY FACE ---------- */
+
+.pixel-cat.hungry-face .mouth {
+  width: 10px;
+  height: 7px;
+
+  border-bottom: 0;
+  border-top: 3px solid #4c302d;
+
+  top: 49px;
+}
+
+
+/* ---------- MORE CALICO DETAIL ---------- */
+
+.pixel-cat.calico .head::marker {
+  display: none;
+}
+
+.pixel-cat.calico .ear-left {
+  background: #cb7944;
+}
+
+.pixel-cat.calico .ear-right {
+  background: #34302e;
+}
+
+.pixel-cat.calico .tail {
+  background:
+    linear-gradient(
+      90deg,
+      #34302e 0 28%,
+      #f0dec0 28% 55%,
+      #cb7944 55% 78%,
+      #34302e 78% 100%
+    );
+}
+
+
+/* ---------- ORANGE DETAIL ---------- */
+
+.pixel-cat.orange .tail {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #d7a36d 0 8px,
+      #c58f5c 8px 13px
+    );
+}
+
+
+/* ---------- GRAY DETAIL ---------- */
+
+.pixel-cat.gray .tail {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #929b9d 0 8px,
+      #737d80 8px 13px
+    );
+}
+
+
+/* ---------- TUXEDO DETAIL ---------- */
+
+.pixel-cat.tuxedo .body::after {
+  background: #f1eee8;
+}
+
+.pixel-cat.tuxedo .mouth {
+  border-color: #9b6f71;
+}
