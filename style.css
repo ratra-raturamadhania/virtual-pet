@@ -1244,3 +1244,364 @@ h1 {
     grid-column: 1 / -1;
   }
 }
+/* =========================================
+   SMOOTHER 4-LEG WALK PATCH
+   tidak mengubah layout kamar / tidur
+========================================= */
+
+/* dua kaki lama = kaki depan */
+.leg-left {
+  left: 20px;
+  z-index: 7;
+}
+
+.leg-right {
+  right: 20px;
+  z-index: 7;
+}
+
+/* dua kaki tambahan dibuat dari body */
+.pixel-cat .body::before,
+.pixel-cat .body::after {
+  content: "";
+  position: absolute;
+
+  width: 16px;
+  height: 23px;
+
+  bottom: -18px;
+
+  border: 4px solid #2a2018;
+
+  background: inherit;
+
+  transform-origin: top center;
+
+  z-index: -1;
+}
+
+/* kaki belakang kiri */
+.pixel-cat .body::before {
+  left: 5px;
+}
+
+/* kaki belakang kanan */
+.pixel-cat .body::after {
+  right: 5px;
+}
+
+
+/* =========================================
+   WALKING
+========================================= */
+
+.pixel-cat.walking {
+  animation:
+    smoothWalkBody .34s
+    ease-in-out
+    infinite alternate;
+}
+
+/* depan kiri */
+.pixel-cat.walking .leg-left {
+  animation:
+    frontLeftWalk .34s
+    ease-in-out
+    infinite alternate;
+}
+
+/* depan kanan */
+.pixel-cat.walking .leg-right {
+  animation:
+    frontRightWalk .34s
+    ease-in-out
+    infinite alternate;
+}
+
+/* belakang kiri */
+.pixel-cat.walking .body::before {
+  animation:
+    backLeftWalk .34s
+    ease-in-out
+    infinite alternate;
+}
+
+/* belakang kanan */
+.pixel-cat.walking .body::after {
+  animation:
+    backRightWalk .34s
+    ease-in-out
+    infinite alternate;
+}
+
+
+/*
+  diagonal gait:
+  depan kiri + belakang kanan
+  bergerak bareng
+
+  depan kanan + belakang kiri
+  bergerak sebaliknya
+*/
+
+@keyframes frontLeftWalk {
+
+  from {
+    transform:
+      rotate(16deg)
+      translateY(-2px);
+  }
+
+  to {
+    transform:
+      rotate(-14deg)
+      translateY(2px);
+  }
+}
+
+@keyframes backRightWalk {
+
+  from {
+    transform:
+      rotate(15deg)
+      translateY(-2px);
+  }
+
+  to {
+    transform:
+      rotate(-13deg)
+      translateY(2px);
+  }
+}
+
+
+@keyframes frontRightWalk {
+
+  from {
+    transform:
+      rotate(-14deg)
+      translateY(2px);
+  }
+
+  to {
+    transform:
+      rotate(16deg)
+      translateY(-2px);
+  }
+}
+
+
+@keyframes backLeftWalk {
+
+  from {
+    transform:
+      rotate(-13deg)
+      translateY(2px);
+  }
+
+  to {
+    transform:
+      rotate(15deg)
+      translateY(-2px);
+  }
+}
+
+
+/* badan sedikit naik-turun + maju-mundur */
+@keyframes smoothWalkBody {
+
+  from {
+    translate: 0 1px;
+    rotate: -.7deg;
+  }
+
+  to {
+    translate: 0 -3px;
+    rotate: .7deg;
+  }
+}
+
+
+/* ekor ikut langkah */
+.pixel-cat.walking .tail {
+  animation:
+    smoothWalkTail .68s
+    ease-in-out
+    infinite alternate;
+}
+
+@keyframes smoothWalkTail {
+
+  from {
+    transform: rotate(-22deg);
+  }
+
+  to {
+    transform: rotate(14deg);
+  }
+}
+
+
+/* =========================================
+   RUN / CHASE BALL
+========================================= */
+
+.pixel-cat.running {
+  animation:
+    smoothRunBody .19s
+    ease-in-out
+    infinite alternate;
+}
+
+
+.pixel-cat.running .leg-left {
+  animation:
+    runFrontLeft .19s
+    ease-in-out
+    infinite alternate;
+}
+
+
+.pixel-cat.running .leg-right {
+  animation:
+    runFrontRight .19s
+    ease-in-out
+    infinite alternate;
+}
+
+
+.pixel-cat.running .body::before {
+  animation:
+    runBackLeft .19s
+    ease-in-out
+    infinite alternate;
+}
+
+
+.pixel-cat.running .body::after {
+  animation:
+    runBackRight .19s
+    ease-in-out
+    infinite alternate;
+}
+
+
+@keyframes smoothRunBody {
+
+  from {
+    translate: 0 1px;
+    rotate: -2deg;
+  }
+
+  to {
+    translate: 0 -7px;
+    rotate: 2deg;
+  }
+}
+
+
+@keyframes runFrontLeft {
+
+  from {
+    transform:
+      rotate(28deg)
+      translateY(-5px);
+  }
+
+  to {
+    transform:
+      rotate(-24deg)
+      translateY(3px);
+  }
+}
+
+
+@keyframes runBackRight {
+
+  from {
+    transform:
+      rotate(25deg)
+      translateY(-5px);
+  }
+
+  to {
+    transform:
+      rotate(-22deg)
+      translateY(3px);
+  }
+}
+
+
+@keyframes runFrontRight {
+
+  from {
+    transform:
+      rotate(-24deg)
+      translateY(3px);
+  }
+
+  to {
+    transform:
+      rotate(28deg)
+      translateY(-5px);
+  }
+}
+
+
+@keyframes runBackLeft {
+
+  from {
+    transform:
+      rotate(-22deg)
+      translateY(3px);
+  }
+
+  to {
+    transform:
+      rotate(25deg)
+      translateY(-5px);
+  }
+}
+
+
+.pixel-cat.running .tail {
+  animation:
+    runningTail .2s
+    ease-in-out
+    infinite alternate;
+}
+
+
+@keyframes runningTail {
+
+  from {
+    transform: rotate(-40deg);
+  }
+
+  to {
+    transform: rotate(-10deg);
+  }
+}
+
+
+/* =========================================
+   IMPORTANT:
+   hide extra legs in special poses
+========================================= */
+
+.pixel-cat.sleeping .body::before,
+.pixel-cat.sleeping .body::after,
+.pixel-cat.bathing .body::before,
+.pixel-cat.bathing .body::after {
+  display: none;
+}
+
+
+/* waktu diangkat semua kaki menggantung */
+.pixel-cat.carried .body::before {
+  transform: rotate(15deg);
+}
+
+.pixel-cat.carried .body::after {
+  transform: rotate(-15deg);
+}
