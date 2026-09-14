@@ -332,6 +332,10 @@ function clearCatStates() {
     "eating",
     "sleeping",
     "bathing",
+    "sitting",
+    "blink",
+    "ear-twitch",
+    "curious",
     "drop-bounce"
   );
 
@@ -340,28 +344,6 @@ function clearCatStates() {
     "on-bed",
     "in-bath",
     "at-food"
-  );
-}
-
-
-function cancelMovement() {
-
-  movementToken++;
-
-  if (movementTimer) {
-    clearTimeout(
-      movementTimer
-    );
-
-    movementTimer = null;
-  }
-
-  petZone.style.transition =
-    "none";
-
-  cat.classList.remove(
-    "walking",
-    "running"
   );
 }
 
@@ -581,10 +563,12 @@ document
             button.dataset.pattern;
 
           applyPattern(
-            data.pattern
-          );
-
-          save();
+           data.pattern
+         );
+         
+         updateCatExpression();
+         
+         save();
 
           say("new look!");
 
@@ -2312,7 +2296,145 @@ setInterval(() => {
 
 }, 60000);
 
+/* =========================================================
+   CAT PERSONALITY SYSTEM
+========================================================= */
 
+function updateCatExpression() {
+
+  cat.classList.remove(
+    "sleepy-face",
+    "hungry-face"
+  );
+
+  if (data.energy < 30) {
+    cat.classList.add("sleepy-face");
+  }
+
+  if (data.hunger < 25) {
+    cat.classList.add("hungry-face");
+  }
+}
+
+
+function blinkCat() {
+
+  if (
+    busy ||
+    catDragging ||
+    ballDragging ||
+    cat.classList.contains("sleeping") ||
+    cat.classList.contains("bathing")
+  ) {
+    return;
+  }
+
+  cat.classList.add("blink");
+
+  setTimeout(() => {
+    cat.classList.remove("blink");
+  }, 130);
+}
+
+
+function twitchEars() {
+
+  if (
+    busy ||
+    catDragging ||
+    ballDragging ||
+    cat.classList.contains("sleeping")
+  ) {
+    return;
+  }
+
+  cat.classList.add("ear-twitch");
+
+  setTimeout(() => {
+    cat.classList.remove("ear-twitch");
+  }, 350);
+}
+
+
+function curiousCat() {
+
+  if (
+    busy ||
+    catDragging ||
+    ballDragging
+  ) {
+    return;
+  }
+
+  cat.classList.add("curious");
+
+  setTimeout(() => {
+    cat.classList.remove("curious");
+  }, 900);
+}
+
+
+function sitCat() {
+
+  if (
+    busy ||
+    catDragging ||
+    ballDragging
+  ) {
+    return;
+  }
+
+  clearCatStates();
+
+  cat.classList.add("sitting");
+
+  const messages = [
+    "...",
+    "mrrp~",
+    "human?",
+    "prrr..."
+  ];
+
+  if (Math.random() > 0.45) {
+    say(
+      messages[
+        Math.floor(
+          Math.random() * messages.length
+        )
+      ]
+    );
+  }
+
+  setTimeout(() => {
+    cat.classList.remove("sitting");
+  }, 2600);
+}
+
+
+/* random blink / ears / curious */
+setInterval(() => {
+
+  if (
+    busy ||
+    catDragging ||
+    ballDragging
+  ) {
+    return;
+  }
+
+  const random = Math.random();
+
+  if (random < 0.55) {
+    blinkCat();
+
+  } else if (random < 0.82) {
+    twitchEars();
+
+  } else {
+    curiousCat();
+  }
+
+}, 2700);
 /* =========================
    STARTUP
 ========================= */
