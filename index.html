@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Pixel Pet</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 
 <body>
@@ -76,21 +76,14 @@
           </div>
 
           <div class="portrait-cat orange" id="portraitCat">
-
             <div class="portrait-ear portrait-ear-left"></div>
             <div class="portrait-ear portrait-ear-right"></div>
-
             <div class="portrait-head">
-              <div class="portrait-patch portrait-patch-head"></div>
               <div class="portrait-eye portrait-eye-left"></div>
               <div class="portrait-eye portrait-eye-right"></div>
               <div class="portrait-nose"></div>
             </div>
-
-            <div class="portrait-body">
-              <div class="portrait-patch portrait-patch-body"></div>
-            </div>
-
+            <div class="portrait-body"></div>
           </div>
 
           <div class="photo-heart">♥</div>
@@ -102,27 +95,19 @@
       <div class="rug"></div>
 
       <div class="bed furniture" id="bed">
-
         <div class="bed-headboard"></div>
-
         <div class="bed-mattress">
           <div class="bed-pillow"></div>
           <div class="bed-blanket"></div>
         </div>
-
         <div class="bed-leg bed-leg-left"></div>
         <div class="bed-leg bed-leg-right"></div>
-
       </div>
 
       <div class="food-corner furniture" id="foodBowl">
-
         <div class="food-mat"></div>
-
         <div class="bowl-food" id="bowlFood"></div>
-
         <div class="food-bowl-shape"></div>
-
       </div>
 
       <div class="ball-start">
@@ -130,54 +115,28 @@
       </div>
 
       <div class="bath furniture" id="bath">
-
         <div class="bath-faucet"></div>
-
         <div class="bath-bubbles">
-          <i></i>
-          <i></i>
-          <i></i>
-          <i></i>
+          <i></i><i></i><i></i><i></i>
         </div>
-
         <div class="bath-rim"></div>
         <div class="bath-body"></div>
-
       </div>
 
       <div id="speech" class="speech hidden">
         meow!
       </div>
 
+      <!-- SPRITE CAT ZONE -->
       <div class="pet-zone" id="petZone">
-
         <div class="pet-shadow"></div>
-
-        <div class="pixel-cat orange" id="pixelCat">
-
-          <div class="tail"></div>
-
-          <div class="body">
-            <div class="patch patch-body"></div>
-
-            <div class="head">
-              <div class="patch patch-head"></div>
-              <div class="ear ear-left"></div>
-              <div class="ear ear-right"></div>
-              <div class="eye eye-left"></div>
-              <div class="eye eye-right"></div>
-              <div class="nose"></div>
-              <div class="mouth"></div>
-            </div>
-          </div>
-
-          <div class="leg leg-left"></div>
-          <div class="leg leg-right"></div>
-
-        </div>
-
+        <img 
+          src="https://raw.githubusercontent.com/poetaster/pixel-art-assets/main/cat-idle.gif" 
+          alt="Pixel Cat" 
+          id="pixelCat" 
+          class="pixel-cat-img"
+        >
         <div class="floating-effect" id="floatingEffect"></div>
-
       </div>
 
       <div class="floor-line"></div>
@@ -215,21 +174,16 @@
   </section>
 
   <section class="customizer">
-
     <span>CAT STYLE</span>
-
     <button data-pattern="orange">ORANGE</button>
     <button data-pattern="tuxedo">TUXEDO</button>
     <button data-pattern="calico">CALICO</button>
     <button data-pattern="gray">GRAY</button>
-
   </section>
 
   <div class="controls">
-
     <button onclick="renamePet()">RENAME</button>
     <button onclick="resetPet()">RESET</button>
-
   </div>
 
   <p class="hint">
@@ -238,7 +192,7 @@
 
 </main>
 
-<script src="script.js?v=3"></script>
+<script src="script.js?v=4"></script>
 
 </body>
 </html>
