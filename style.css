@@ -35,7 +35,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 
 .floor-line { position: absolute; left: 0; right: 0; top: 65%; height: 5px; background: #604a34; }
 
-/* === ENVIRONMENT === */
+/* WINDOW */
 .window-pixel { position: absolute; left: 45px; top: 35px; width: 150px; height: 118px; background: #83b9dc; border: 8px solid #f1e2b9; box-shadow: inset 0 0 0 4px #604a34, 6px 6px 0 rgba(0,0,0,.12); }
 .window-pixel::before { content: ""; position: absolute; background: #604a34; width: 4px; height: 100%; left: 50%; }
 .window-pixel::after { content: ""; position: absolute; background: #604a34; width: 100%; height: 4px; top: 50%; }
@@ -57,7 +57,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .sf-stem { position: absolute; width: 6px; height: 47px; left: 15px; top: 38px; background: #567647; }
 .sunflower-pot { position: absolute; width: 58px; height: 34px; bottom: 0; left: 18px; background: #ad6f4f; border: 4px solid #573827; }
 
-/* === PHOTO FRAME === */
+/* PHOTO FRAME */
 .photo-frame { position: absolute; right: 54px; top: 31px; width: 115px; height: 130px; padding: 8px; background: #714d3d; border: 5px solid #412d25; box-shadow: 6px 6px 0 rgba(0,0,0,.14); }
 .photo-inner { width: 100%; height: 100%; position: relative; overflow: hidden; background: linear-gradient(#d7c3b1,#bba493); border: 3px solid #f2dfc0; }
 .owner-shadow { position: absolute; left: 7px; bottom: -3px; width: 55px; height: 90px; opacity: .5; }
@@ -80,7 +80,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .portrait-cat.calico .portrait-head, .portrait-cat.calico .portrait-ear, .portrait-cat.calico .portrait-body { background: #f0dec0; }
 .portrait-cat.gray .portrait-head, .portrait-cat.gray .portrait-ear, .portrait-cat.gray .portrait-body { background: #929a9d; }
 
-/* === FURNITURE === */
+/* FURNITURE */
 .rug { position: absolute; left: 52%; bottom: 22px; transform: translateX(-50%); width: 330px; height: 105px; border-radius: 50%; background: #c68c77; border: 5px solid #68483f; opacity: .82; z-index: 1; }
 
 .bed { position: absolute; left: 19px; bottom: 24px; width: 175px; height: 100px; z-index: 12; }
@@ -109,7 +109,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .ball-start { position: absolute; left: 54%; bottom: 55px; z-index: 20; }
 .ball { width: 44px; height: 44px; border-radius: 50%; border: 5px solid #30241a; background: linear-gradient(45deg, #d95b60 0%, #d95b60 50%, #f0d16c 50%, #f0d16c 100%); cursor: grab; touch-action: none; }
 
-/* === PET ZONE === */
+/* PET ZONE & BASE CAT STRUCTURE */
 .pet-zone {
   --depth-scale: 1;
   position: absolute; width: 130px; height: 150px; left: 50%; bottom: 65px;
@@ -122,7 +122,6 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pet-shadow { position: absolute; left: 29px; bottom: -2px; width: 72px; height: 14px; border-radius: 50%; background: rgba(49,34,23,.22); }
 .pet-zone.at-food { z-index: 25 !important; }
 
-/* === CAT BASE (FIXED 4 LEGS) === */
 .pixel-cat {
   position: absolute; width: 100px; height: 120px; left: 15px; bottom: 0;
   cursor: grab; user-select: none; touch-action: none;
@@ -131,17 +130,16 @@ h1 { font-size: 21px; margin-top: 7px; }
 
 @keyframes catIdle { 0%,100% { translate: 0 0; } 50% { translate: 0 -3px; } }
 
-.head { position: absolute; width: 74px; height: 62px; left: 13px; top: 10px; border: 5px solid #2a2018; z-index: 8; }
+.head { position: absolute; width: 74px; height: 62px; left: 13px; top: 10px; border: 5px solid #2a2018; z-index: 8; transform: none !important; }
 .ear { position: absolute; width: 26px; height: 28px; top: 0; border: 5px solid #2a2018; z-index: 7; transform-origin: bottom center; }
 .ear-left { left: 8px; transform: rotate(45deg); }
 .ear-right { right: 8px; transform: rotate(45deg); }
 .body { position: absolute; width: 66px; height: 60px; left: 17px; bottom: 10px; border: 5px solid #2a2018; z-index: 6; }
 
-/* Kaki Depan */
+/* Leg Alignment Fixed */
 .leg { position: absolute; width: 18px; height: 22px; bottom: 0; border: 4px solid #2a2018; z-index: 7; transform-origin: top center; }
 .leg-left { left: 20px; } .leg-right { right: 20px; }
 
-/* Kaki Belakang - FIXED COORDINATES (bottom: -10px, height: 22px) */
 .pixel-cat .body::before, .pixel-cat .body::after {
   content: ""; position: absolute; width: 15px; height: 22px; bottom: -10px; 
   border: 4px solid #2a2018; background: inherit; transform-origin: top center; z-index: -1;
@@ -151,7 +149,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .tail { position: absolute; width: 45px; height: 18px; right: -15px; bottom: 25px; border: 5px solid #2a2018; z-index: 2; transform-origin: left center; animation: tailIdle 1.4s ease-in-out infinite alternate; }
 @keyframes tailIdle { from { transform: rotate(-20deg); } to { transform: rotate(18deg); } }
 
-/* === CAT FACE === */
+/* CAT FACE */
 .eye { position: absolute; width: 8px; height: 8px; top: 24px; background: #201913; transform-origin: center; }
 .eye-left { left: 15px; } .eye-right { right: 15px; }
 .eye::after { content: ""; position: absolute; width: 2px; height: 2px; left: 2px; top: 1px; background: rgba(255,255,255,.75); }
@@ -162,7 +160,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pixel-cat .head::before { left: 5px; } .pixel-cat .head::after { right: 5px; }
 .pixel-cat.happy .head::before, .pixel-cat.happy .head::after { opacity: .85; }
 
-/* === CAT COLORS === */
+/* COLOR STYLES */
 .pixel-cat .head, .pixel-cat .body, .pixel-cat .ear, .pixel-cat .tail { background: #d7a36d; }
 .pixel-cat .leg { background: #e5b782; }
 
@@ -186,9 +184,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pixel-cat.gray .head, .pixel-cat.gray .body, .pixel-cat.gray .ear, .pixel-cat.gray .tail, .pixel-cat.gray .leg { background: #929b9d; }
 .pixel-cat.gray .tail { background: repeating-linear-gradient(90deg, #929b9d 0 8px, #737d80 8px 13px); }
 
-/* === ANIMATIONS (MERGED & CLEAN) === */
-
-/* Walk */
+/* ANIMATIONS */
 .pixel-cat.walking { animation: walkBody .32s ease-in-out infinite alternate; }
 .pixel-cat.walking .leg-left { animation: walkFL .32s ease-in-out infinite alternate; }
 .pixel-cat.walking .leg-right { animation: walkFR .32s ease-in-out infinite alternate; }
@@ -203,7 +199,6 @@ h1 { font-size: 21px; margin-top: 7px; }
 @keyframes walkBL { from { transform: rotate(-15deg) translateY(2px); } to { transform: rotate(15deg) translateY(-2px); } }
 @keyframes walkTail { from { transform: rotate(-20deg); } to { transform: rotate(14deg); } }
 
-/* Run */
 .pixel-cat.running { animation: runBody .17s ease-in-out infinite alternate; }
 .pixel-cat.running .leg-left { animation: runFL .17s ease-in-out infinite alternate; }
 .pixel-cat.running .leg-right { animation: runFR .17s ease-in-out infinite alternate; }
@@ -218,7 +213,6 @@ h1 { font-size: 21px; margin-top: 7px; }
 @keyframes runBL { from { transform: rotate(-24deg) translateY(4px); } to { transform: rotate(26deg) translateY(-4px); } }
 @keyframes runTail { from { transform: rotate(-40deg); } to { transform: rotate(-10deg); } }
 
-/* Carried */
 .pixel-cat.carried { animation: carriedFloat .28s ease-in-out infinite alternate; }
 @keyframes carriedFloat { from { rotate: -3deg; scale: 1.03; } to { rotate: 3deg; scale: 1.07; } }
 .pixel-cat.carried .leg-left { transform: rotate(18deg); }
@@ -226,7 +220,6 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pixel-cat.carried .body::before { transform: rotate(16deg); }
 .pixel-cat.carried .body::after { transform: rotate(-16deg); }
 
-/* Happy */
 .pixel-cat.happy { animation: happyJump .35s ease-in-out 4; }
 @keyframes happyJump { 0%,100% { translate: 0 0; } 50% { translate: 0 -22px; } }
 .pixel-cat.happy .ear-left { transform: rotate(35deg); }
@@ -234,17 +227,16 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pixel-cat.happy .tail { animation: happyTail .18s ease-in-out infinite alternate; }
 @keyframes happyTail { from { transform: rotate(-35deg); } to { transform: rotate(30deg); } }
 
-/* Eating */
 .pixel-cat.eating .head { animation: eatHead .35s ease-in-out infinite alternate; }
 @keyframes eatHead { from { transform: translateY(8px); } to { transform: translateY(17px) rotate(5deg); } }
 
-/* Sleep */
+/* SLEEP STATE */
 .pet-zone.on-bed { z-index: 18 !important; }
 .pet-zone.on-bed .pet-shadow { display: none; }
 .pixel-cat.sleeping { animation: sleepBreath 1.6s ease-in-out infinite alternate; }
 @keyframes sleepBreath { from { translate: 0 0; } to { translate: 0 2px; } }
 
-.pixel-cat.sleeping .head { left: 5px; top: 48px; transform: rotate(-8deg); z-index: 8; }
+.pixel-cat.sleeping .head { left: 5px; top: 48px; transform: rotate(-8deg) !important; z-index: 8; }
 .pixel-cat.sleeping .ear-left { left: 7px; top: 48px; transform: rotate(35deg); z-index: 7; }
 .pixel-cat.sleeping .ear-right { left: 27px; right: auto; top: 45px; transform: rotate(55deg); z-index: 7; }
 .pixel-cat.sleeping .body { left: 38px; bottom: 12px; width: 67px; height: 46px; border-radius: 25px 35px 25px 30px; transform: rotate(2deg); z-index: 6; }
@@ -252,17 +244,15 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pixel-cat.sleeping .tail { width: 48px; right: -4px; bottom: 17px; transform: rotate(8deg); animation: none; }
 .pixel-cat.sleeping .leg, .pixel-cat.sleeping .body::before, .pixel-cat.sleeping .body::after { display: none !important; }
 
-/* Bath */
+/* BATH STATE */
 .pet-zone.in-bath { z-index: 30 !important; }
 .pet-zone.in-bath .pet-shadow { display: none; }
 .pixel-cat.bathing .body, .pixel-cat.bathing .leg, .pixel-cat.bathing .tail, .pixel-cat.bathing .body::before, .pixel-cat.bathing .body::after { opacity: 0; }
-.pixel-cat.bathing .head { transform: none !important; }
 
-/* Drop */
 .pixel-cat.drop-bounce { animation: dropBounce .35s ease; }
 @keyframes dropBounce { 0% { scale: 1; } 50% { scale: 1.08 .84; } 100% { scale: 1; } }
 
-/* Personality */
+/* PERSONALITY EXPRESSIONS */
 .pixel-cat.blink .eye { height: 3px !important; top: 28px; }
 .pixel-cat.ear-twitch .ear-left { animation: earTL .25s ease; }
 .pixel-cat.ear-twitch .ear-right { animation: earTR .25s ease; }
@@ -285,7 +275,7 @@ h1 { font-size: 21px; margin-top: 7px; }
 .pixel-cat.sleepy-face .tail { transform: rotate(-28deg); }
 .pixel-cat.hungry-face .mouth { width: 10px; height: 7px; border-bottom: 0; border-top: 3px solid #4c302d; top: 49px; }
 
-/* === UI FX & MEDIA === */
+/* UI ELEMENTS */
 .speech { position: absolute; left: 50%; top: 175px; transform: translateX(-50%); z-index: 100; background: #fff6d4; border: 4px solid #292820; box-shadow: 4px 4px 0 rgba(0,0,0,.18); padding: 10px 12px; font-size: 8px; }
 .hidden { display: none; }
 .floating-effect { position: absolute; left: 50%; top: -30px; transform: translateX(-50%); z-index: 100; font-size: 24px; }
