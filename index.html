@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Pixel Pet</title>
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 
 <body>
@@ -12,7 +12,6 @@
 <main class="game-shell">
 
   <header class="topbar">
-
     <div>
       <span class="mini-label">PIXEL PET</span>
       <h1 id="petName">Sucipto</h1>
@@ -23,11 +22,9 @@
       <div>XP <span id="xp">0</span>/100</div>
       <div>🪙 <span id="coins">100</span></div>
     </div>
-
   </header>
 
   <section class="screen">
-
     <div class="room" id="room">
 
       <div class="window-pixel">
@@ -36,7 +33,6 @@
       </div>
 
       <div class="sunflower-corner">
-
         <div class="sunflower sf-one">
           <div class="sf-petal sf-p1"></div>
           <div class="sf-petal sf-p2"></div>
@@ -44,7 +40,6 @@
           <div class="sf-petal sf-p4"></div>
           <div class="sf-petal sf-p5"></div>
           <div class="sf-petal sf-p6"></div>
-
           <div class="sf-center"></div>
           <div class="sf-stem"></div>
         </div>
@@ -56,19 +51,14 @@
           <div class="sf-petal sf-p4"></div>
           <div class="sf-petal sf-p5"></div>
           <div class="sf-petal sf-p6"></div>
-
           <div class="sf-center"></div>
           <div class="sf-stem"></div>
         </div>
-
         <div class="sunflower-pot"></div>
-
       </div>
 
       <div class="photo-frame">
-
         <div class="photo-inner">
-
           <div class="owner-shadow">
             <div class="owner-hair"></div>
             <div class="owner-head"></div>
@@ -85,11 +75,8 @@
             </div>
             <div class="portrait-body"></div>
           </div>
-
           <div class="photo-heart">♥</div>
-
         </div>
-
       </div>
 
       <div class="rug"></div>
@@ -123,19 +110,35 @@
         <div class="bath-body"></div>
       </div>
 
-      <div id="speech" class="speech hidden">
-        meow!
-      </div>
+      <div id="speech" class="speech hidden">meow!</div>
 
-      <!-- SPRITE CAT ZONE -->
+      <!-- PET ZONE - EMBEDDED SPRITE -->
       <div class="pet-zone" id="petZone">
         <div class="pet-shadow"></div>
-        <img 
-          src="https://raw.githubusercontent.com/poetaster/pixel-art-assets/main/cat-idle.gif" 
-          alt="Pixel Cat" 
-          id="pixelCat" 
-          class="pixel-cat-img"
-        >
+        <div class="pixel-cat orange" id="pixelCat">
+          <!-- Kucing Terpadu Menggunakan SVG Pixel Visual -->
+          <svg class="cat-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <!-- Tail -->
+            <path class="cat-color" d="M24 20h4v2h-2v2h-2z"/>
+            <!-- Body -->
+            <path class="cat-color" d="M10 16h12v12H10z"/>
+            <path class="cat-dark" d="M10 16h12v2H10z" opacity="0.15"/>
+            <!-- Legs -->
+            <path class="cat-dark" d="M11 26h3v4h-3zm7 0h3v4h-3z"/>
+            <!-- Head -->
+            <path class="cat-color" d="M8 8h16v10H8z"/>
+            <path d="M8 8h16v2H8z" fill="#1e1810" opacity="0.2"/>
+            <!-- Ears -->
+            <path class="cat-color" d="M8 4h5v4H8zm11 0h5v4h-5z"/>
+            <path class="cat-dark" d="M9 5h3v3H9zm11 0h3v3h-3z" opacity="0.3"/>
+            <!-- Eyes -->
+            <path class="cat-eye" d="M11 11h3v3h-3zm7 0h3v3h-3z"/>
+            <path fill="#fff" d="M11 11h1v1h-1zm7 0h1v1h-1z"/>
+            <!-- Nose & Mouth -->
+            <path fill="#d67b7b" d="M15 14h2v1h-2z"/>
+            <path fill="#1e1810" d="M14 15h4v1h-4z"/>
+          </svg>
+        </div>
         <div class="floating-effect" id="floatingEffect"></div>
       </div>
 
@@ -144,31 +147,26 @@
     </div>
 
     <div class="stats">
-
       <div class="stat">
         <span>HUNGER</span>
         <div class="meter"><div id="hungerBar"></div></div>
         <b id="hungerText">80</b>
       </div>
-
       <div class="stat">
         <span>HAPPY</span>
         <div class="meter"><div id="happyBar"></div></div>
         <b id="happyText">80</b>
       </div>
-
       <div class="stat">
         <span>ENERGY</span>
         <div class="meter"><div id="energyBar"></div></div>
         <b id="energyText">80</b>
       </div>
-
       <div class="stat">
         <span>CLEAN</span>
         <div class="meter"><div id="cleanBar"></div></div>
         <b id="cleanText">80</b>
       </div>
-
     </div>
 
   </section>
@@ -186,13 +184,11 @@
     <button onclick="resetPet()">RESET</button>
   </div>
 
-  <p class="hint">
-    pet • pick up • throw the ball • tap furniture
-  </p>
+  <p class="hint">pet • pick up • throw the ball • tap furniture</p>
 
 </main>
 
-<script src="script.js?v=4"></script>
+<script src="script.js?v=5"></script>
 
 </body>
 </html>
