@@ -1,9 +1,9 @@
 /* =========================================================
-   PIXEL PET - STABLE SCRIPT (ANIMATION FIX)
+   PIXEL PET - FINAL STABLE SCRIPT
 ========================================================= */
 
 /* =========================
-   DATA
+   DATA & SAVING
 ========================= */
 
 const defaultData = {
@@ -35,6 +35,10 @@ let data = {
 
 if (!validPatterns.includes(data.pattern)) {
   data.pattern = "orange";
+}
+
+function save() {
+  localStorage.setItem("pixelPetData", JSON.stringify(data));
 }
 
 
@@ -82,6 +86,7 @@ let ballVY = 0;
 let idleTimer = null;
 let movementTimer = null;
 let movementToken = 0;
+let currentFlip = 1;
 
 
 /* =========================
@@ -95,10 +100,6 @@ function cancelMovement() {
     movementTimer = null;
   }
   petZone.style.transition = "none";
-}
-
-function save() {
-  localStorage.setItem("pixelPetData", JSON.stringify(data));
 }
 
 function clamp(value, min, max) {
@@ -157,6 +158,11 @@ function updateDepth(feetY) {
 
   petZone.style.setProperty("--depth-scale", scale);
   petZone.style.zIndex = Math.round(30 + progress * 25);
+  applyTransform();
+}
+
+function applyTransform() {
+  petZone.style.transform = `translateX(-50%) scale(var(--depth-scale)) scaleX(${currentFlip})`;
 }
 
 
@@ -187,6 +193,7 @@ function setSpecialPosition(x, top, { scale = 1, zIndex = 30 } = {}) {
   petZone.style.bottom = "auto";
   petZone.style.setProperty("--depth-scale", scale);
   petZone.style.zIndex = zIndex;
+  applyTransform();
 }
 
 function clearCatStates() {
@@ -206,6 +213,7 @@ function clearCatStates() {
   );
 
   petZone.classList.remove("is-carried", "on-bed", "in-bath", "at-food");
+  cat.style.transform = "";
 }
 
 
@@ -225,6 +233,7 @@ function updateUI() {
   setStat("clean", data.cleanliness);
 
   applyPattern(data.pattern);
+  updateCatExpression();
   save();
 }
 
@@ -291,7 +300,7 @@ document.querySelectorAll("[data-pattern]").forEach(button => {
 
 
 /* =========================
-   MOVEMENT SYSTEM (FIXED)
+   MOVEMENT SYSTEM
 ========================= */
 
 function movePetTo(targetX, targetFeetY, { run = false, callback = null } = {}) {
@@ -306,11 +315,10 @@ function movePetTo(targetX, targetFeetY, { run = false, callback = null } = {}) 
   const dy = safeY - currentFeetY();
   const distance = Math.hypot(dx, dy);
 
-  // Arah hadap kucing via scaleX CSS agar tidak merusak style animasi
   if (dx < -2) {
-    petZone.style.transform = "scaleX(-1)";
+    currentFlip = -1;
   } else if (dx > 2) {
-    petZone.style.transform = "scaleX(1)";
+    currentFlip = 1;
   }
 
   if (distance < 5) {
@@ -510,7 +518,8 @@ foodBowl.addEventListener("click", event => {
   movePetTo(eatX, eatY, {
     callback: () => {
       clearCatStates();
-      petZone.style.transform = "scaleX(-1)"; // Menghadap mangkuk
+      currentFlip = -1;
+      applyTransform();
       petZone.classList.add("at-food");
       cat.classList.add("eating");
 
@@ -556,7 +565,8 @@ bed.addEventListener("click", event => {
   movePetTo(approachX, floorNearY() - 8, {
     callback: () => {
       clearCatStates();
-      petZone.style.transform = "scaleX(1)";
+      currentFlip = 1;
+      applyTransform();
 
       const sleepX = bedR.left - roomR.left + bedR.width * 0.58;
       const sleepTop = bedR.top - roomR.top - 62;
